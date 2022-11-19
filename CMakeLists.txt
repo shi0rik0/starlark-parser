@@ -16,4 +16,4 @@ bison_target(PARSER "${SRC_DIR}/parser.y" "${PARSER_OUT}" DEFINES_FILE "${PARSER
 add_flex_bison_dependency(LEXER PARSER)
 
 add_executable(calc "${SRC_DIR}/main.c" "${LEXER_OUT}" "${PARSER_OUT}")
-target_include_directories(calc PRIVATE "${PARSER_DIR}")
+target_include_directories(calc PRIVATE "${PARSER_DIR}" "include")
