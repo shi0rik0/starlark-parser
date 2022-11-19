@@ -8,15 +8,17 @@ INTEGER [0-9]+
 
 %%
 
-"+" { return PLUS; }
-"-" { return MINUS; }
-"*" { return TIMES; }
+"+" { return ADD; }
+"-" { return SUB; }
+"*" { return MUL; }
 "(" { return LPAREN; }
 ")" { return RPAREN; }
 
 {INTEGER} {
-    yylval = atoi(yytext);
-    return NUMBER;
+    yylval.i = atoi(yytext);
+    return INTEGER;
 }
 
-. ;
+. {
+
+}

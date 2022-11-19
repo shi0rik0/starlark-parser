@@ -1,4 +1,3 @@
-%define api.value.type {int}
 %parse-param {int *ret}
 
 %code top {
@@ -11,43 +10,73 @@
     }
 }
 
+%union {
+    int i;
+    void* none;
+}
+
+
+
+
 // Terminals
 
-%token NUMBER PLUS MINUS TIMES UMINUS LPAREN RPAREN
+// Literals
+%token <i> INTEGER
+
+// Punctuations
+//     =
+%token <none> ASSIGN
+//     +   -   *   /   //       %   **  >>     <<     &      |     ^
+%token <none> ADD SUB MUL DIV FLOORDIV MOD POW RSHIFT LSHIFT BITAND BITOR XOR
+//     +=   -=   *=   /=   //=       %=   **=  <<=     >>=     &=      |=     ^=
+%token <none> IADD ISUB IMUL IDIV IFLOORDIV IMOD IPOW IRSHIFT ILSHIFT IBITAND IBITOR IXOR
+//     <  >  <= >= == !=
+%token <none> LT GT LE GE EQ NE
+//     +   -   ~
+%token <none> POS NEG INVERT
+//     .   ,     ;         :
+%token <none> DOT COMMA SEMICOLON COLON
+//     (      )      [        ]        {      }
+%token <none> LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
+
+// Keywords
+%token <none> AND ELIF IN OR BREAK ELSE LAMBDA PASS CONTINUE FOR LOAD RETURN DEF IF NOT WHILE
 
 // Precedence and associativity
 
-%left PLUS MINUS
+/* %left PLUS MINUS
 %left TIMES
-%left UMINUS
+%left UMINUS */
+
+%type <i> Start Expr
 
 %%
 
 // Grammar rules
 
-start
-    : expr {
+Start 
+    : Expr {
         *ret = $1;
     }
 ;
 
-expr
-    : expr PLUS expr {
+Expr
+    : Expr ADD Expr {
         $$ = $1 + $3;
     }
-    | expr MINUS expr {
+    | Expr SUB Expr {
         $$ = $1 - $3;
     }
-    | expr TIMES expr {
+    | Expr MUL Expr {
         $$ = $1 * $3;
     }
-    | MINUS expr %prec UMINUS {
+    | SUB Expr %prec NEG {
         $$ = -$2;
     }
-    | LPAREN expr RPAREN {
+    | LPAREN Expr RPAREN {
         $$ = $2;
     }
-    | NUMBER {
+    | INTEGER {
         $$ = $1;
     }
 ;
