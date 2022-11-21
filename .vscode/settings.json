@@ -1,3 +1,7 @@
 {
-    "C_Cpp.clang_format_fallbackStyle": "WebKit"
+    "files.associations": {
+        "type_traits": "cpp",
+        "lexer.h": "c",
+        "debug.h": "c"
+    }
 }
