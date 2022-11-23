@@ -1,138 +1,180 @@
 %option noyywrap
 
-%top {
+
+%top{
+    // This part will be copied to lexer.h
     #include "types.h"
     #include "parser.h"
 }
 
-INTEGER [0-9]+
 
-IDENTIFIER 1
-INT 1
-FLOAT 1
-STRING 1
-BYTES 1
-LIST 1
-TUPLE 1
-DICT 1
+%{
+    // This part will be copied to lexer.c
+    #define RETURN_NOT_NEW_LINE(x) do { at_line_start = 0; return (x); } while (0)
+    static int at_line_start = 1;
+    char indent_char;
+    int indent_num = 0;
+
+    // str_all_eq("aaaaa", 'a') -> 1
+    // str_all_eq("aaaab", 'a') -> 0
+    int str_all_eq(const char* str, char c) {
+        for (int i = 0; str[i] != '\0'; ++i) {
+            if (str[i] != c) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+%}
+
+IDENTIFIER adsfsafxcz
+INT [0-9]+
+FLOAT sadxcjvkl
+STRING asdfjkzxc
+BYTES cvjklkjald
+LIST adsxzcvkl
+TUPLE sadfjklzcx
+DICT sadfjkxczvl
 
 %%
+    /* White spaces */
+\n|\r\n {
+    at_line_start = 1;
+    return NEW_LINE;
+}
+
+<<EOF>> {
+    return NEW_LINE;
+}
+
+
+[ \t]+ {
+    if (indent_num == 0) {
+        if (!str_all_eq(yytext + 1, yytext[0])) {
+            // error
+        }
+        indent_char = yytext[0];
+        indent_num = yyleng;
+        RETURN_NOT_NEW_LINE(INDENT);
+    }
+    if (!(str_all_eq(yytext, indent_char) && indent_num == yyleng)) {
+        // error
+    }
+    RETURN_NOT_NEW_LINE(INDENT);
+}
+
 
     /* Punctuations */
-"+" { return ADD; }
-"-" { return SUB; }
-"*" { return MUL; }
-"/" { return DIV; }
-"//" { return FLOORDIV; }
-"%" { return MOD; }
-"**" { return POW; }
-">>" { return RSHIFT; }
-"<<" { return LSHIFT; }
-"&" { return BITAND; }
-"|" { return BITOR; }
-"^" { return XOR; }
+"+" { RETURN_NOT_NEW_LINE(ADD); }
+"-" { RETURN_NOT_NEW_LINE(SUB); }
+"*" { RETURN_NOT_NEW_LINE(MUL); }
+"/" { RETURN_NOT_NEW_LINE(DIV); }
+"//" { RETURN_NOT_NEW_LINE(FLOORDIV); }
+"%" { RETURN_NOT_NEW_LINE(MOD); }
+"**" { RETURN_NOT_NEW_LINE(POW); }
+">>" { RETURN_NOT_NEW_LINE(RSHIFT); }
+"<<" { RETURN_NOT_NEW_LINE(LSHIFT); }
+"&" { RETURN_NOT_NEW_LINE(BITAND); }
+"|" { RETURN_NOT_NEW_LINE(BITOR); }
+"^" { RETURN_NOT_NEW_LINE(XOR); }
 
-"+=" { return IADD; }
-"-=" { return ISUB; }
-"*=" { return IMUL; }
-"/=" { return IDIV; }
-"//=" { return IFLOORDIV; }
-"%=" { return IMOD; }
-"**=" { return IPOW; }
-"<<=" { return IRSHIFT; }
-">>=" { return ILSHIFT; }
-"&=" { return IBITAND; }
-"|=" { return IBITOR; }
-"^=" { return IXOR; }
+"+=" { RETURN_NOT_NEW_LINE(IADD); }
+"-=" { RETURN_NOT_NEW_LINE(ISUB); }
+"*=" { RETURN_NOT_NEW_LINE(IMUL); }
+"/=" { RETURN_NOT_NEW_LINE(IDIV); }
+"//=" { RETURN_NOT_NEW_LINE(IFLOORDIV); }
+"%=" { RETURN_NOT_NEW_LINE(IMOD); }
+"**=" { RETURN_NOT_NEW_LINE(IPOW); }
+"<<=" { RETURN_NOT_NEW_LINE(IRSHIFT); }
+">>=" { RETURN_NOT_NEW_LINE(ILSHIFT); }
+"&=" { RETURN_NOT_NEW_LINE(IBITAND); }
+"|=" { RETURN_NOT_NEW_LINE(IBITOR); }
+"^=" { RETURN_NOT_NEW_LINE(IXOR); }
 
-"<" { return LT; }
-">" { return GT; }
-"<=" { return LE; }
-">=" { return GE; }
-"==" { return EQ; }
-"!=" { return NE; }
+"<" { RETURN_NOT_NEW_LINE(LT); }
+">" { RETURN_NOT_NEW_LINE(GT); }
+"<=" { RETURN_NOT_NEW_LINE(LE); }
+">=" { RETURN_NOT_NEW_LINE(GE); }
+"==" { RETURN_NOT_NEW_LINE(EQ); }
+"!=" { RETURN_NOT_NEW_LINE(NE); }
 
-"+" { return POS; }
-"-" { return NEG; }
-"~" { return INVERT; }
+"+" { RETURN_NOT_NEW_LINE(POS); }
+"-" { RETURN_NOT_NEW_LINE(NEG); }
+"~" { RETURN_NOT_NEW_LINE(INVERT); }
 
-"." { return DOT; }
-"," { return COMMA; }
-";" { return SEMICOLON; }
-":" { return COLON; }
+"." { RETURN_NOT_NEW_LINE(DOT); }
+"," { RETURN_NOT_NEW_LINE(COMMA); }
+";" { RETURN_NOT_NEW_LINE(SEMICOLON); }
+":" { RETURN_NOT_NEW_LINE(COLON); }
 
-"(" { return LPAREN; }
-")" { return RPAREN; }
-"[" { return LBRACKET; }
-"]" { return RBRACKET; }
-"{" { return LBRACE; }
-"}" { return RBRACE; }
+"(" { RETURN_NOT_NEW_LINE(LPAREN); }
+")" { RETURN_NOT_NEW_LINE(RPAREN); }
+"[" { RETURN_NOT_NEW_LINE(LBRACKET); }
+"]" { RETURN_NOT_NEW_LINE(RBRACKET); }
+"{" { RETURN_NOT_NEW_LINE(LBRACE); }
+"}" { RETURN_NOT_NEW_LINE(RBRACE); }
 
     /* Keywords */
-"and" { return AND; }
-"elif" { return ELIF; }
-"in" { return IN; }
-"or" { return OR; }
-"break" { return BREAK; }
-"else" { return ELSE; }
-"lambda" { return LAMBDA; }
-"pass" { return PASS; }
-"continue" { return CONTINUE; }
-"for" { return FOR; }
-"load" { return LOAD; }
-"return" { return RETURN; }
-"def" { return DEF; }
-"if" { return IF; }
-"not" { return NOT; }
-"while" { return WHILE; }
+"and" { RETURN_NOT_NEW_LINE(AND); }
+"elif" { RETURN_NOT_NEW_LINE(ELIF); }
+"in" { RETURN_NOT_NEW_LINE(IN); }
+"or" { RETURN_NOT_NEW_LINE(OR); }
+"break" { RETURN_NOT_NEW_LINE(BREAK); }
+"else" { RETURN_NOT_NEW_LINE(ELSE); }
+"lambda" { RETURN_NOT_NEW_LINE(LAMBDA); }
+"pass" { RETURN_NOT_NEW_LINE(PASS); }
+"continue" { RETURN_NOT_NEW_LINE(CONTINUE); }
+"for" { RETURN_NOT_NEW_LINE(FOR); }
+"load" { RETURN_NOT_NEW_LINE(LOAD); }
+"return" { RETURN_NOT_NEW_LINE(RETURN); }
+"def" { RETURN_NOT_NEW_LINE(DEF); }
+"if" { RETURN_NOT_NEW_LINE(IF); }
+"not" { RETURN_NOT_NEW_LINE(NOT); }
+"while" { RETURN_NOT_NEW_LINE(WHILE); }
 
-{INTEGER} {
-    yylval.i = atoi(yytext);
-    return INTEGER;
-}
 
 {IDENTIFIER} {
     
-    return IDENTIFIER;
+    RETURN_NOT_NEW_LINE(IDENTIFIER);
 }
 
 {INT} {
-    
-    return INT;
+    yylval.string = yytext;
+    RETURN_NOT_NEW_LINE(INT);
 }
 
 {FLOAT} {
     
-    return FLOAT;
+    RETURN_NOT_NEW_LINE(FLOAT);
 }
 
 {STRING} {
     
-    return STRING;
+    RETURN_NOT_NEW_LINE(STRING);
 }
 
 {BYTES} {
     
-    return BYTES;
+    RETURN_NOT_NEW_LINE(BYTES);
 }
 
 {LIST} {
     
-    return LIST;
+    RETURN_NOT_NEW_LINE(LIST);
 }
 
 {TUPLE} {
     
-    return TUPLE;
+    RETURN_NOT_NEW_LINE(TUPLE);
 }
 
 {DICT} {
     
-    return INTEGER;
+    RETURN_NOT_NEW_LINE(DICT);
 }
 
 
     /* Default */
 . {
-
+    // error
 }
