@@ -20,22 +20,22 @@ void print_expr(Expr* e)
 {
     switch (e->type) {
     case Expr_Type_BINARY_EXPR:
-        print_binary_expr(&e->data.binary_expr);
+        print_binary_expr(e->data.binary_expr);
         break;
     case Expr_Type_CALL_EXPR:
-        print_call_expr(&e->data.call_expr);
+        print_call_expr(e->data.call_expr);
         break;
     case Expr_Type_IF_EXPR:
-        print_if_expr(&e->data.if_expr);
+        print_if_expr(e->data.if_expr);
         break;
     case Expr_Type_INDEX_EXPR:
-        print_index_expr(&e->data.index_expr);
+        print_index_expr(e->data.index_expr);
         break;
     case Expr_Type_PRIMARY_EXPR:
-        print_binary_expr(&e->data.binary_expr);
+        print_binary_expr(e->data.binary_expr);
         break;
     case Expr_Type_UNARY_EXPR:
-        print_binary_expr(&e->data.binary_expr);
+        print_binary_expr(e->data.binary_expr);
         break;
     }
 }

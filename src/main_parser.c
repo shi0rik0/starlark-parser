@@ -1,12 +1,8 @@
-<<<<<<< HEAD
 #include "debug.h"
-=======
-#include <stdio.h>
->>>>>>> update lexer
 #include "lexer.h"
 #include "parser.h"
 #include "types.h"
-
+#include "utils.h"
 #include <stdio.h>
 
 int main(void)

@@ -30,9 +30,10 @@
 
 INT -?[0-9]+
 IDENTIFIER [_a-zA-Z][_a-zA-Z0-9]*
-FLOAT -?([0-9]+|[0-9]*.[0-9]*)(e[-?[0-9]+])?
-STRING \".*\"|'.*'
-BYTES b\".*\"|b'.*'
+FLOAT -?((([0-9]*\.[0-9]*)(e-?[0-9]+)?)|([0-9]+(e-?[0-9]+)))
+/* ord('[')==91 ord('\')==92 ord(']')==93*/
+STRING \"([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
+BYTES b\"([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
 
 %%
     /* White spaces */
@@ -131,48 +132,35 @@ BYTES b\".*\"|b'.*'
 "while" { RETURN_NOT_NEW_LINE(WHILE); }
 
 
-{IDENTIFIER} {
-    
-    RETURN_NOT_NEW_LINE(IDENTIFIER);
-}
-
-{INT} {
-    yylval.string = yytext;
-    RETURN_NOT_NEW_LINE(INT);
-}
-
 {FLOAT} {
-    
+    yylval.float_ = atof(yytext);
     RETURN_NOT_NEW_LINE(FLOAT);
 }
 
+{INT} {
+    yylval.string = new_str(yytext, yyleng);
+    RETURN_NOT_NEW_LINE(INT);
+}
+
+{IDENTIFIER} {
+    yylval.string = new_str(yytext, yyleng);
+    RETURN_NOT_NEW_LINE(IDENTIFIER);
+}
+
 {STRING} {
-    
+    yylval.string = new_str(yytext, yyleng);
     RETURN_NOT_NEW_LINE(STRING);
 }
 
 {BYTES} {
-    
+    yylval.string = new_str(yytext, yyleng);
     RETURN_NOT_NEW_LINE(BYTES);
-}
-
-{LIST} {
-    
-    RETURN_NOT_NEW_LINE(LIST);
-}
-
-{TUPLE} {
-    
-    RETURN_NOT_NEW_LINE(TUPLE);
-}
-
-{DICT} {
-    
-    RETURN_NOT_NEW_LINE(DICT);
 }
 
 
     /* Default */
 . {
+    printf("UNKNOWN TOKEN!\n");
+    return UNKNOWN_TOKEN;
     // error
 }
