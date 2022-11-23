@@ -1,7 +1,11 @@
 %parse-param {StatementList **ret}
 
-%code top {
+%code requires {
     #include "types.h"
+}
+
+%code {
+    
     #include <stdio.h>
 
     extern int yylex(void);
