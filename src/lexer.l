@@ -32,19 +32,21 @@ INT -?[0-9]+
 IDENTIFIER [_a-zA-Z][_a-zA-Z0-9]*
 FLOAT -?((([0-9]*\.[0-9]*)(e-?[0-9]+)?)|([0-9]+(e-?[0-9]+)))
 /* ord('[')==91 ord('\')==92 ord(']')==93*/
-STRING \"([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
-BYTES b\"([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([-\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
+STRING \"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
+BYTES b\"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
 
 %%
     /* White spaces */
+<<EOF>> {
+    return 0;
+}
+
 \n|\r\n {
     at_line_start = 1;
     return NEW_LINE;
 }
 
-<<EOF>> {
-    return NEW_LINE;
-}
+
 
 
 [ \t]+ {
