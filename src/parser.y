@@ -1,4 +1,4 @@
-%parse-param {int *ret}
+%parse-param {StatementList **ret}
 
 %code top {
     #include "types.h"
@@ -6,26 +6,22 @@
 
     extern int yylex(void);
 
-    static void yyerror(int *ret, const char* s) {
+    static void yyerror(StatementList **ret, const char* s) {
         fprintf(stderr, "%s\n", s);
     }
 }
 
 %union {
-    int i;
     char* string;
     double float_;
     ExprList* expr_list;
     MappingList* mapping_list;
+    StatementList* statement_list;
+    Statement* statement;
+    Expr* expr;
     struct{} none;
 }
 
-
-
-
-
-// Literals
-%token <i> INTEGER
 
 // See PrimaryExpr_Type in <types.h>
 %token <string> IDENTIFIER
@@ -36,6 +32,9 @@
 %token <expr_list> LIST
 %token <expr_list> TUPLE
 %token <mapping_list> DICT
+
+// White spaces
+%token <none> NEW_LINE INDENT
 
 // Punctuations
 //            =
@@ -62,35 +61,44 @@
 %left TIMES
 %left UMINUS */
 
-%type <i> Start Expr
+/* %type <i> Start Expr */
+%type <statement_list> Start Statements 
+%type <statement> ExprStatement
+%type <expr> Expr PrimaryExpr
 
 %%
 
 // Grammar rules
 
 Start 
-    : Expr {
+    : Statements {
         *ret = $1;
     }
 ;
 
+Statements
+    : ExprStatement {
+        $$ = new_statement_list($1, NULL);
+    }
+    | ExprStatement Statements {
+        $$ = new_statement_list($1, $2);
+    }
+;
+
+ExprStatement
+    : Expr NEW_LINE {
+        $$ = new_statement(Statement_Type_EXPR_STATEMENT, $1); 
+    }
+;
+
 Expr
-    : Expr ADD Expr {
-        $$ = $1 + $3;
-    }
-    | Expr SUB Expr {
-        $$ = $1 - $3;
-    }
-    | Expr MUL Expr {
-        $$ = $1 * $3;
-    }
-    | SUB Expr %prec NEG {
-        $$ = -$2;
-    }
-    | LPAREN Expr RPAREN {
-        $$ = $2;
-    }
-    | INTEGER {
+    : PrimaryExpr {
         $$ = $1;
     }
 ;
+
+PrimaryExpr
+    : INT {
+        $$ = new_primary_expr(PrimaryExpr_Type_INT, $1);
+    }
+
