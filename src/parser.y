@@ -95,6 +95,9 @@ Expr
     : PrimaryExpr {
         $$ = $1;
     }
+    | IDENTIFIER {
+        $$ = $1;
+    }
 ;
 
 PrimaryExpr

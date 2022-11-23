@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 
 # GoogleTest requires at least C++14
 set(CMAKE_CXX_STANDARD 14)
@@ -18,7 +18,7 @@ flex_target(LEXER "${SRC_DIR}/lexer.l" "${LEXER_OUT}" DEFINES_FILE "${PARSER_DIR
 bison_target(PARSER "${SRC_DIR}/parser.y" "${PARSER_OUT}" DEFINES_FILE "${PARSER_DIR}/parser.h")
 add_flex_bison_dependency(LEXER PARSER)
 
-add_executable(calc "src/main.c" "src/debug.c" "src/types.c" "${LEXER_OUT}" "${PARSER_OUT}")
+add_executable(calc "src/main.c" "src/debug.c" "src/types.c" "src/utils.c" "${LEXER_OUT}" "${PARSER_OUT}")
 target_include_directories(calc PRIVATE "${PARSER_DIR}" "include")
 
 include(FetchContent)

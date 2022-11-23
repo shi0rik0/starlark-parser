@@ -5,6 +5,7 @@
     // This part will be copied to lexer.h
     #include "types.h"
     #include "parser.h"
+    #include "utils.h"
 }
 
 
@@ -27,14 +28,11 @@
     }
 %}
 
-IDENTIFIER adsfsafxcz
-INT [0-9]+
-FLOAT sadxcjvkl
-STRING asdfjkzxc
-BYTES cvjklkjald
-LIST adsxzcvkl
-TUPLE sadfjklzcx
-DICT sadfjkxczvl
+INT -?[0-9]+
+IDENTIFIER [_a-zA-Z][_a-zA-Z0-9]*
+FLOAT -?([0-9]+|[0-9]*.[0-9]*)(e[-?[0-9]+])?
+STRING \".*\"|'.*'
+BYTES b\".*\"|b'.*'
 
 %%
     /* White spaces */
