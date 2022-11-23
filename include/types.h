@@ -48,6 +48,12 @@ typedef struct Statement {
         AssignStatement* assign_statement;
         struct Expr* expr_statement;
         LoadStatement* load_statement;
+        struct {
+        } break_statement;
+        struct {
+        } continue_statement;
+        struct {
+        } pass_statement;
     } data;
 } Statement;
 
@@ -92,7 +98,7 @@ typedef struct PrimaryExpr {
     union {
         char* identifier;
         char* int_;
-        double float_;
+        double* float_;
         char* string;
         char* bytes;
         ExprList* list;
@@ -185,17 +191,22 @@ typedef enum Expr_Type {
 typedef struct Expr {
     Expr_Type type;
     union {
-        IfExpr if_expr;
-        PrimaryExpr primary_expr;
-        UnaryExpr unary_expr;
-        BinaryExpr binary_expr;
-        LambdaExpr lambda_expr;
-        ListComprehension list_comprehension;
-        DictComprehension dict_comprehension;
-        CallExpr call_expr;
-        IndexExpr index_expr;
+        IfExpr* if_expr;
+        PrimaryExpr* primary_expr;
+        UnaryExpr* unary_expr;
+        BinaryExpr* binary_expr;
+        LambdaExpr* lambda_expr;
+        ListComprehension* list_comprehension;
+        DictComprehension* dict_comprehension;
+        CallExpr* call_expr;
+        IndexExpr* index_expr;
     } data;
 } Expr;
+
+StatementList* new_statement_list(Statement* statement, StatementList* next);
+Statement* new_statement(Statement_Type type, void* data);
+Expr* new_expr(Expr_Type type, void* data);
+PrimaryExpr* new_primary_expr(PrimaryExpr_Type type, void* data);
 
 #ifdef __cplusplus
 }
