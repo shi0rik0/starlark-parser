@@ -1,29 +1,30 @@
+#include "utils.h"
+#include "parser.h"
+#include "types.h"
+#include <iostream>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// make sure types.h is at top
-#include "types.h"
-#include "utils.h"
-#include "parser.h"
 
-YYSTYPE yylval;
+using namespace std;
 
-void print_token(int c)
+void print_token(int token, const YYSTYPE& value)
 {
     /*----- Print token names -----*/
 
-    switch (c) {
+    switch (token) {
     case IDENTIFIER:
-        printf("identifier(%s)\n", yylval.string);
+        printf("identifier(%s)\n", value.string);
         break;
     case INT:
-        printf("int(%s)\n", yylval.string);
+        printf("int(%s)\n", value.string);
         break;
     case FLOAT:
-        printf("float(%f)\n", yylval.float_);
+        printf("float(%f)\n", value.float_);
         break;
     case STRING:
-        printf("string(%s)\n", yylval.string);
+        printf("string(%s)\n", value.string);
         break;
     case BYTES:
         printf("bytes\n");
@@ -223,6 +224,12 @@ void print_token(int c)
     case WHILE:
         printf("while\n");
         break;
+    case DEDENT:
+        printf("dedent\n");
+        break;
+    default:
+        fatal_error("error: unknown token");
+        break;
     }
     /*-----  -----*/
 }
@@ -231,9 +238,34 @@ char* new_str(char* str, int len)
 {
     char* res = (char*)malloc(sizeof(char) * (len + 1));
     if (res == NULL) {
-        printf("Failure in malloc.\n");
-        exit(0);
+        fprintf(stderr, "Failure in malloc.\n");
+        exit(1);
     }
     strcpy(res, str);
     return res;
+}
+
+void fatal_error(const std::string& error_msg)
+{
+    cerr << error_msg;
+    if (error_msg.empty() || error_msg.back() != '\n') {
+        cerr << endl;
+    }
+    exit(1);
+}
+
+std::string sprintfpp(const char* format, ...)
+{
+    static char buf[1];
+    va_list args;
+    va_start(args, format);
+    int len = vsnprintf(buf, 1, format, args);
+    va_end(args);
+    char* s = new char[len + 1];
+    va_start(args, format);
+    vsnprintf(s, len + 1, format, args);
+    va_end(args);
+    string ret(s);
+    delete[] s;
+    return ret;
 }
