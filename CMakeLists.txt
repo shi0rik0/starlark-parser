@@ -13,20 +13,20 @@ set(PARSER_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 find_package(FLEX 2.6 REQUIRED)
 find_package(BISON 3.0 REQUIRED)
 
-set(LEXER_OUT "${PARSER_DIR}/lexer.c")
-set(PARSER_OUT "${PARSER_DIR}/parser.c")
+set(LEXER_OUT "${PARSER_DIR}/lexer.cpp")
+set(PARSER_OUT "${PARSER_DIR}/parser.cpp")
 
 flex_target(LEXER "${SRC_DIR}/lexer.l" "${LEXER_OUT}" DEFINES_FILE "${PARSER_DIR}/lexer.h")
 bison_target(PARSER "${SRC_DIR}/parser.y" "${PARSER_OUT}" DEFINES_FILE "${PARSER_DIR}/parser.h")
 add_flex_bison_dependency(LEXER PARSER)
 
-set(SRCS "src/debug.c" "src/types.c" "src/utils.c" "${LEXER_OUT}" "${PARSER_OUT}")
+set(SRCS "src/debug.cpp" "src/types.cpp" "src/utils.cpp" "${LEXER_OUT}" "${PARSER_OUT}")
 set(INCLUDES "${PARSER_DIR}" "include")
 
-add_executable(parser "src/main_parser.c" ${SRCS})
+add_executable(parser "src/main_parser.cpp" ${SRCS})
 target_include_directories(parser PRIVATE ${INCLUDES})
 
-add_executable(lexer "src/main_lexer.c" ${SRCS})
+add_executable(lexer "src/main_lexer.cpp" ${SRCS})
 target_include_directories(lexer PRIVATE ${INCLUDES})
 
 
