@@ -1,10 +1,10 @@
 {
     "files.associations": {
         "type_traits": "cpp",
-        "lexer.h": "c",
-        "debug.h": "c",
-        "utils.h": "c",
-        "string.h": "c",
-        "parser.h": "c"
+        "lexer.h": "cpp",
+        "debug.h": "cpp",
+        "utils.h": "cpp",
+        "string.h": "cpp",
+        "parser.h": "cpp"
     }
 }
