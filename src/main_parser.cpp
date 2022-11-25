@@ -1,4 +1,3 @@
-#include "debug.h"
 #include "lexer.h"
 #include "parser.h"
 #include "types.h"
