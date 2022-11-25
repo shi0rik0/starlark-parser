@@ -1,168 +1,244 @@
 %option noyywrap
+%option yylineno
 
 
 %top{
     // This part will be copied to lexer.h
-    #include "types.h"
     #include "parser.h"
     #include "utils.h"
 }
 
 
 %{
-    // This part will be copied to lexer.c
-    #define RETURN_NOT_NEW_LINE(x) do { at_line_start = 0; return (x); } while (0)
-    static int at_line_start = 1;
-    char indent_char;
-    int indent_num = 0;
+    // This part will be copied to lexer.cpp
+    #include <stack>
+    using namespace std;
+    static char indent_char = 0;
+    static int indent_length_temp = 0;
 
-    // str_all_eq("aaaaa", 'a') -> 1
-    // str_all_eq("aaaab", 'a') -> 0
-    int str_all_eq(const char* str, char c) {
-        for (int i = 0; str[i] != '\0'; ++i) {
+    static stack<int> indent_lengths;
+    
+    static char get_all_same(const char* str) {
+        if (str == nullptr || str[0] == '\0') {
+            return 0;
+        }
+        char c = str[0];
+        for (int i = 1; str[i] != '\0'; ++i) {
             if (str[i] != c) {
                 return 0;
             }
         }
-        return 1;
+        return c;
     }
 %}
 
-INT -?[0-9]+
+
 IDENTIFIER [_a-zA-Z][_a-zA-Z0-9]*
+INT -?[0-9]+
 FLOAT -?((([0-9]*\.[0-9]*)(e-?[0-9]+)?)|([0-9]+(e-?[0-9]+)))
 /* ord('[')==91 ord('\')==92 ord(']')==93*/
 STRING \"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
 BYTES b\"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
+COMMENT #[^\n]*\n
+/* supports both Unix and Windows style new line */
+NL \n|\r\n 
+
+%x STATE_LINE_START
+%x STATE_NOT_LINE_START
+%x STATE_DEDENT
 
 %%
-    /* White spaces */
-<<EOF>> {
-    return 0;
+
+<INITIAL>. {
+    // do some initialization work here
+    yyless(0);
+    indent_lengths.push(0);
+    BEGIN(STATE_LINE_START);
 }
 
-\n|\r\n {
-    at_line_start = 1;
+<STATE_NOT_LINE_START>{COMMENT} {
+
+}
+
+<INITIAL,STATE_LINE_START><<EOF>> {
+    indent_length_temp = 0;
+    BEGIN(STATE_DEDENT);
+}
+
+
+    /* add a fake new line if the input doesn't end with a new line */
+<STATE_NOT_LINE_START><<EOF>> {
+    BEGIN(STATE_LINE_START);
     return NEW_LINE;
 }
 
 
+<STATE_NOT_LINE_START>{NL} {
+    BEGIN(STATE_LINE_START);
+    return NEW_LINE;
+}
 
 
-[ \t]+ {
-    if (indent_num == 0) {
-        if (!str_all_eq(yytext + 1, yytext[0])) {
-            // error
-        }
-        indent_char = yytext[0];
-        indent_num = yyleng;
-        RETURN_NOT_NEW_LINE(INDENT);
+<STATE_LINE_START>[ \t]+ {
+    static const char error_msg[] = "error: lexer: use both spaces and tabs for indent in line %d";
+    char c = get_all_same(yytext);
+    if (!c) {
+        fatal_error(sprintfpp(error_msg, yylineno));
     }
-    if (!(str_all_eq(yytext, indent_char) && indent_num == yyleng)) {
-        // error
+    if (!indent_char) {
+        indent_char = c;
+    } else if (c != indent_char) {
+        fatal_error(sprintfpp(error_msg, yylineno));
     }
-    RETURN_NOT_NEW_LINE(INDENT);
+    if (yyleng > indent_lengths.top()) {
+        indent_lengths.push(yyleng);
+        BEGIN(STATE_NOT_LINE_START);
+        return INDENT;
+    }
+    if (yyleng < indent_lengths.top()) {
+        indent_length_temp = yyleng;
+        BEGIN(STATE_DEDENT);
+    } else {
+        BEGIN(STATE_NOT_LINE_START);
+    }
+}
+
+
+    /* empty line */
+<STATE_LINE_START>[ \t]*{COMMENT}?{NL}? {
+}
+
+<STATE_DEDENT><<EOF>> {
+    if (indent_length_temp > indent_lengths.top()) {
+        fatal_error(sprintfpp("error: lexer: unknown indent level in line %d", yylineno));
+    }
+    yyless(0);
+    if (indent_length_temp < indent_lengths.top()) {
+        indent_lengths.pop();
+        return DEDENT;
+    } else {
+        return 0;
+    }
+}
+
+<STATE_DEDENT>. {
+    if (indent_length_temp > indent_lengths.top()) {
+        fatal_error(sprintfpp("error: lexer: unknown indent level in line %d", yylineno));
+    }
+    yyless(0);
+    if (indent_length_temp < indent_lengths.top()) {
+        indent_lengths.pop();
+        return DEDENT;
+    } 
+    BEGIN(STATE_NOT_LINE_START);
+}
+
+<STATE_LINE_START>. {
+    yyless(0);
+    indent_length_temp = 0;
+    BEGIN(STATE_DEDENT);
+}
+
+<STATE_NOT_LINE_START>[ \t]+ {
+
 }
 
 
     /* Punctuations */
-"+" { RETURN_NOT_NEW_LINE(ADD); }
-"-" { RETURN_NOT_NEW_LINE(SUB); }
-"*" { RETURN_NOT_NEW_LINE(MUL); }
-"/" { RETURN_NOT_NEW_LINE(DIV); }
-"//" { RETURN_NOT_NEW_LINE(FLOORDIV); }
-"%" { RETURN_NOT_NEW_LINE(MOD); }
-"**" { RETURN_NOT_NEW_LINE(POW); }
-">>" { RETURN_NOT_NEW_LINE(RSHIFT); }
-"<<" { RETURN_NOT_NEW_LINE(LSHIFT); }
-"&" { RETURN_NOT_NEW_LINE(BITAND); }
-"|" { RETURN_NOT_NEW_LINE(BITOR); }
-"^" { RETURN_NOT_NEW_LINE(XOR); }
+<STATE_NOT_LINE_START>"=" { return ASSIGN; }
+<STATE_NOT_LINE_START>"+" { return ADD; }
+<STATE_NOT_LINE_START>"-" { return SUB; }
+<STATE_NOT_LINE_START>"*" { return MUL; }
+<STATE_NOT_LINE_START>"/" { return DIV; }
+<STATE_NOT_LINE_START>"//" { return FLOORDIV; }
+<STATE_NOT_LINE_START>"%" { return MOD; }
+<STATE_NOT_LINE_START>"**" { return POW; }
+<STATE_NOT_LINE_START>">>" { return RSHIFT; }
+<STATE_NOT_LINE_START>"<<" { return LSHIFT; }
+<STATE_NOT_LINE_START>"&" { return BITAND; }
+<STATE_NOT_LINE_START>"|" { return BITOR; }
+<STATE_NOT_LINE_START>"^" { return XOR; }
 
-"+=" { RETURN_NOT_NEW_LINE(IADD); }
-"-=" { RETURN_NOT_NEW_LINE(ISUB); }
-"*=" { RETURN_NOT_NEW_LINE(IMUL); }
-"/=" { RETURN_NOT_NEW_LINE(IDIV); }
-"//=" { RETURN_NOT_NEW_LINE(IFLOORDIV); }
-"%=" { RETURN_NOT_NEW_LINE(IMOD); }
-"**=" { RETURN_NOT_NEW_LINE(IPOW); }
-"<<=" { RETURN_NOT_NEW_LINE(IRSHIFT); }
-">>=" { RETURN_NOT_NEW_LINE(ILSHIFT); }
-"&=" { RETURN_NOT_NEW_LINE(IBITAND); }
-"|=" { RETURN_NOT_NEW_LINE(IBITOR); }
-"^=" { RETURN_NOT_NEW_LINE(IXOR); }
+<STATE_NOT_LINE_START>"+=" { return IADD; }
+<STATE_NOT_LINE_START>"-=" { return ISUB; }
+<STATE_NOT_LINE_START>"*=" { return IMUL; }
+<STATE_NOT_LINE_START>"/=" { return IDIV; }
+<STATE_NOT_LINE_START>"//=" { return IFLOORDIV; }
+<STATE_NOT_LINE_START>"%=" { return IMOD; }
+<STATE_NOT_LINE_START>"**=" { return IPOW; }
+<STATE_NOT_LINE_START>"<<=" { return IRSHIFT; }
+<STATE_NOT_LINE_START>">>=" { return ILSHIFT; }
+<STATE_NOT_LINE_START>"&=" { return IBITAND; }
+<STATE_NOT_LINE_START>"|=" { return IBITOR; }
+<STATE_NOT_LINE_START>"^=" { return IXOR; }
 
-"<" { RETURN_NOT_NEW_LINE(LT); }
-">" { RETURN_NOT_NEW_LINE(GT); }
-"<=" { RETURN_NOT_NEW_LINE(LE); }
-">=" { RETURN_NOT_NEW_LINE(GE); }
-"==" { RETURN_NOT_NEW_LINE(EQ); }
-"!=" { RETURN_NOT_NEW_LINE(NE); }
+<STATE_NOT_LINE_START>"<" { return LT; }
+<STATE_NOT_LINE_START>">" { return GT; }
+<STATE_NOT_LINE_START>"<=" { return LE; }
+<STATE_NOT_LINE_START>">=" { return GE; }
+<STATE_NOT_LINE_START>"==" { return EQ; }
+<STATE_NOT_LINE_START>"!=" { return NE; }
 
-"+" { RETURN_NOT_NEW_LINE(POS); }
-"-" { RETURN_NOT_NEW_LINE(NEG); }
-"~" { RETURN_NOT_NEW_LINE(INVERT); }
+<STATE_NOT_LINE_START>"+" { return POS; }
+<STATE_NOT_LINE_START>"-" { return NEG; }
+<STATE_NOT_LINE_START>"~" { return INVERT; }
 
-"." { RETURN_NOT_NEW_LINE(DOT); }
-"," { RETURN_NOT_NEW_LINE(COMMA); }
-";" { RETURN_NOT_NEW_LINE(SEMICOLON); }
-":" { RETURN_NOT_NEW_LINE(COLON); }
+<STATE_NOT_LINE_START>"." { return DOT; }
+<STATE_NOT_LINE_START>"," { return COMMA; }
+<STATE_NOT_LINE_START>";" { return SEMICOLON; }
+<STATE_NOT_LINE_START>":" { return COLON; }
 
-"(" { RETURN_NOT_NEW_LINE(LPAREN); }
-")" { RETURN_NOT_NEW_LINE(RPAREN); }
-"[" { RETURN_NOT_NEW_LINE(LBRACKET); }
-"]" { RETURN_NOT_NEW_LINE(RBRACKET); }
-"{" { RETURN_NOT_NEW_LINE(LBRACE); }
-"}" { RETURN_NOT_NEW_LINE(RBRACE); }
+<STATE_NOT_LINE_START>"(" { return LPAREN; }
+<STATE_NOT_LINE_START>")" { return RPAREN; }
+<STATE_NOT_LINE_START>"[" { return LBRACKET; }
+<STATE_NOT_LINE_START>"]" { return RBRACKET; }
+<STATE_NOT_LINE_START>"{" { return LBRACE; }
+<STATE_NOT_LINE_START>"}" { return RBRACE; }
 
     /* Keywords */
-"and" { RETURN_NOT_NEW_LINE(AND); }
-"elif" { RETURN_NOT_NEW_LINE(ELIF); }
-"in" { RETURN_NOT_NEW_LINE(IN); }
-"or" { RETURN_NOT_NEW_LINE(OR); }
-"break" { RETURN_NOT_NEW_LINE(BREAK); }
-"else" { RETURN_NOT_NEW_LINE(ELSE); }
-"lambda" { RETURN_NOT_NEW_LINE(LAMBDA); }
-"pass" { RETURN_NOT_NEW_LINE(PASS); }
-"continue" { RETURN_NOT_NEW_LINE(CONTINUE); }
-"for" { RETURN_NOT_NEW_LINE(FOR); }
-"load" { RETURN_NOT_NEW_LINE(LOAD); }
-"return" { RETURN_NOT_NEW_LINE(RETURN); }
-"def" { RETURN_NOT_NEW_LINE(DEF); }
-"if" { RETURN_NOT_NEW_LINE(IF); }
-"not" { RETURN_NOT_NEW_LINE(NOT); }
-"while" { RETURN_NOT_NEW_LINE(WHILE); }
+<STATE_NOT_LINE_START>"and" { return AND; }
+<STATE_NOT_LINE_START>"elif" { return ELIF; }
+<STATE_NOT_LINE_START>"in" { return IN; }
+<STATE_NOT_LINE_START>"or" { return OR; }
+<STATE_NOT_LINE_START>"break" { return BREAK; }
+<STATE_NOT_LINE_START>"else" { return ELSE; }
+<STATE_NOT_LINE_START>"lambda" { return LAMBDA; }
+<STATE_NOT_LINE_START>"pass" { return PASS; }
+<STATE_NOT_LINE_START>"continue" { return CONTINUE; }
+<STATE_NOT_LINE_START>"for" { return FOR; }
+<STATE_NOT_LINE_START>"load" { return LOAD; }
+<STATE_NOT_LINE_START>"return" { return RETURN; }
+<STATE_NOT_LINE_START>"def" { return DEF; }
+<STATE_NOT_LINE_START>"if" { return IF; }
+<STATE_NOT_LINE_START>"not" { return NOT; }
+<STATE_NOT_LINE_START>"while" { return WHILE; }
 
 
-{FLOAT} {
+<STATE_NOT_LINE_START>{FLOAT} {
     yylval.float_ = atof(yytext);
-    RETURN_NOT_NEW_LINE(FLOAT);
+    return FLOAT;
 }
 
-{INT} {
+<STATE_NOT_LINE_START>{INT} {
     yylval.string = new_str(yytext, yyleng);
-    RETURN_NOT_NEW_LINE(INT);
+    return INT;
 }
 
-{IDENTIFIER} {
+<STATE_NOT_LINE_START>{IDENTIFIER} {
     yylval.string = new_str(yytext, yyleng);
-    RETURN_NOT_NEW_LINE(IDENTIFIER);
+    return IDENTIFIER;
 }
 
-{STRING} {
+<STATE_NOT_LINE_START>{STRING} {
     yylval.string = new_str(yytext, yyleng);
-    RETURN_NOT_NEW_LINE(STRING);
+    return STRING;
 }
 
-{BYTES} {
+<STATE_NOT_LINE_START>{BYTES} {
     yylval.string = new_str(yytext, yyleng);
-    RETURN_NOT_NEW_LINE(BYTES);
+    return BYTES;
 }
 
-
-    /* Default */
-. {
-    printf("UNKNOWN TOKEN!\n");
-    return UNKNOWN_TOKEN;
-    // error
+<STATE_NOT_LINE_START>. {
+    fatal_error(sprintfpp("error: lexer: illegal token %s in line %d\n", yytext, yylineno));
 }
