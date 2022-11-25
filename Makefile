@@ -10,7 +10,7 @@ parser: build
 	cmake --build build --target parser
 
 build: CMakeLists.txt
-	cmake -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -Bbuild -G Ninja
+	cmake -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -Bbuild
 
 .PHONY: run-lexer
 run-lexer: lexer
