@@ -69,13 +69,13 @@ NL \n|\r\n
     /* add a fake new line if the input doesn't end with a new line */
 <STATE_NOT_LINE_START><<EOF>> {
     BEGIN(STATE_LINE_START);
-    return NEW_LINE;
+    return yy::parser::token::NEW_LINE;
 }
 
 
 <STATE_NOT_LINE_START>{NL} {
     BEGIN(STATE_LINE_START);
-    return NEW_LINE;
+    return yy::parser::token::NEW_LINE;
 }
 
 
@@ -93,7 +93,7 @@ NL \n|\r\n
     if (yyleng > indent_lengths.top()) {
         indent_lengths.push(yyleng);
         BEGIN(STATE_NOT_LINE_START);
-        return INDENT;
+        return yy::parser::token::INDENT;
     }
     if (yyleng < indent_lengths.top()) {
         indent_length_temp = yyleng;
@@ -115,7 +115,7 @@ NL \n|\r\n
     yyless(0);
     if (indent_length_temp < indent_lengths.top()) {
         indent_lengths.pop();
-        return DEDENT;
+        return yy::parser::token::DEDENT;
     } else {
         return 0;
     }
@@ -128,7 +128,7 @@ NL \n|\r\n
     yyless(0);
     if (indent_length_temp < indent_lengths.top()) {
         indent_lengths.pop();
-        return DEDENT;
+        return yy::parser::token::DEDENT;
     } 
     BEGIN(STATE_NOT_LINE_START);
 }
@@ -145,98 +145,98 @@ NL \n|\r\n
 
 
     /* Punctuations */
-<STATE_NOT_LINE_START>"=" { return ASSIGN; }
-<STATE_NOT_LINE_START>"+" { return ADD; }
-<STATE_NOT_LINE_START>"-" { return SUB; }
-<STATE_NOT_LINE_START>"*" { return MUL; }
-<STATE_NOT_LINE_START>"/" { return DIV; }
-<STATE_NOT_LINE_START>"//" { return FLOORDIV; }
-<STATE_NOT_LINE_START>"%" { return MOD; }
-<STATE_NOT_LINE_START>"**" { return POW; }
-<STATE_NOT_LINE_START>">>" { return RSHIFT; }
-<STATE_NOT_LINE_START>"<<" { return LSHIFT; }
-<STATE_NOT_LINE_START>"&" { return BITAND; }
-<STATE_NOT_LINE_START>"|" { return BITOR; }
-<STATE_NOT_LINE_START>"^" { return XOR; }
+<STATE_NOT_LINE_START>"=" { return yy::parser::token::ASSIGN; }
+<STATE_NOT_LINE_START>"+" { return yy::parser::token::ADD; }
+<STATE_NOT_LINE_START>"-" { return yy::parser::token::SUB; }
+<STATE_NOT_LINE_START>"*" { return yy::parser::token::MUL; }
+<STATE_NOT_LINE_START>"/" { return yy::parser::token::DIV; }
+<STATE_NOT_LINE_START>"//" { return yy::parser::token::FLOORDIV; }
+<STATE_NOT_LINE_START>"%" { return yy::parser::token::MOD; }
+<STATE_NOT_LINE_START>"**" { return yy::parser::token::POW; }
+<STATE_NOT_LINE_START>">>" { return yy::parser::token::RSHIFT; }
+<STATE_NOT_LINE_START>"<<" { return yy::parser::token::LSHIFT; }
+<STATE_NOT_LINE_START>"&" { return yy::parser::token::BITAND; }
+<STATE_NOT_LINE_START>"|" { return yy::parser::token::BITOR; }
+<STATE_NOT_LINE_START>"^" { return yy::parser::token::XOR; }
 
-<STATE_NOT_LINE_START>"+=" { return IADD; }
-<STATE_NOT_LINE_START>"-=" { return ISUB; }
-<STATE_NOT_LINE_START>"*=" { return IMUL; }
-<STATE_NOT_LINE_START>"/=" { return IDIV; }
-<STATE_NOT_LINE_START>"//=" { return IFLOORDIV; }
-<STATE_NOT_LINE_START>"%=" { return IMOD; }
-<STATE_NOT_LINE_START>"**=" { return IPOW; }
-<STATE_NOT_LINE_START>"<<=" { return IRSHIFT; }
-<STATE_NOT_LINE_START>">>=" { return ILSHIFT; }
-<STATE_NOT_LINE_START>"&=" { return IBITAND; }
-<STATE_NOT_LINE_START>"|=" { return IBITOR; }
-<STATE_NOT_LINE_START>"^=" { return IXOR; }
+<STATE_NOT_LINE_START>"+=" { return yy::parser::token::IADD; }
+<STATE_NOT_LINE_START>"-=" { return yy::parser::token::ISUB; }
+<STATE_NOT_LINE_START>"*=" { return yy::parser::token::IMUL; }
+<STATE_NOT_LINE_START>"/=" { return yy::parser::token::IDIV; }
+<STATE_NOT_LINE_START>"//=" { return yy::parser::token::IFLOORDIV; }
+<STATE_NOT_LINE_START>"%=" { return yy::parser::token::IMOD; }
+<STATE_NOT_LINE_START>"**=" { return yy::parser::token::IPOW; }
+<STATE_NOT_LINE_START>"<<=" { return yy::parser::token::IRSHIFT; }
+<STATE_NOT_LINE_START>">>=" { return yy::parser::token::ILSHIFT; }
+<STATE_NOT_LINE_START>"&=" { return yy::parser::token::IBITAND; }
+<STATE_NOT_LINE_START>"|=" { return yy::parser::token::IBITOR; }
+<STATE_NOT_LINE_START>"^=" { return yy::parser::token::IXOR; }
 
-<STATE_NOT_LINE_START>"<" { return LT; }
-<STATE_NOT_LINE_START>">" { return GT; }
-<STATE_NOT_LINE_START>"<=" { return LE; }
-<STATE_NOT_LINE_START>">=" { return GE; }
-<STATE_NOT_LINE_START>"==" { return EQ; }
-<STATE_NOT_LINE_START>"!=" { return NE; }
+<STATE_NOT_LINE_START>"<" { return yy::parser::token::LT; }
+<STATE_NOT_LINE_START>">" { return yy::parser::token::GT; }
+<STATE_NOT_LINE_START>"<=" { return yy::parser::token::LE; }
+<STATE_NOT_LINE_START>">=" { return yy::parser::token::GE; }
+<STATE_NOT_LINE_START>"==" { return yy::parser::token::EQ; }
+<STATE_NOT_LINE_START>"!=" { return yy::parser::token::NE; }
 
-<STATE_NOT_LINE_START>"+" { return POS; }
-<STATE_NOT_LINE_START>"-" { return NEG; }
-<STATE_NOT_LINE_START>"~" { return INVERT; }
+<STATE_NOT_LINE_START>"+" { return yy::parser::token::POS; }
+<STATE_NOT_LINE_START>"-" { return yy::parser::token::NEG; }
+<STATE_NOT_LINE_START>"~" { return yy::parser::token::INVERT; }
 
-<STATE_NOT_LINE_START>"." { return DOT; }
-<STATE_NOT_LINE_START>"," { return COMMA; }
-<STATE_NOT_LINE_START>";" { return SEMICOLON; }
-<STATE_NOT_LINE_START>":" { return COLON; }
+<STATE_NOT_LINE_START>"." { return yy::parser::token::DOT; }
+<STATE_NOT_LINE_START>"," { return yy::parser::token::COMMA; }
+<STATE_NOT_LINE_START>";" { return yy::parser::token::SEMICOLON; }
+<STATE_NOT_LINE_START>":" { return yy::parser::token::COLON; }
 
-<STATE_NOT_LINE_START>"(" { return LPAREN; }
-<STATE_NOT_LINE_START>")" { return RPAREN; }
-<STATE_NOT_LINE_START>"[" { return LBRACKET; }
-<STATE_NOT_LINE_START>"]" { return RBRACKET; }
-<STATE_NOT_LINE_START>"{" { return LBRACE; }
-<STATE_NOT_LINE_START>"}" { return RBRACE; }
+<STATE_NOT_LINE_START>"(" { return yy::parser::token::LPAREN; }
+<STATE_NOT_LINE_START>")" { return yy::parser::token::RPAREN; }
+<STATE_NOT_LINE_START>"[" { return yy::parser::token::LBRACKET; }
+<STATE_NOT_LINE_START>"]" { return yy::parser::token::RBRACKET; }
+<STATE_NOT_LINE_START>"{" { return yy::parser::token::LBRACE; }
+<STATE_NOT_LINE_START>"}" { return yy::parser::token::RBRACE; }
 
     /* Keywords */
-<STATE_NOT_LINE_START>"and" { return AND; }
-<STATE_NOT_LINE_START>"elif" { return ELIF; }
-<STATE_NOT_LINE_START>"in" { return IN; }
-<STATE_NOT_LINE_START>"or" { return OR; }
-<STATE_NOT_LINE_START>"break" { return BREAK; }
-<STATE_NOT_LINE_START>"else" { return ELSE; }
-<STATE_NOT_LINE_START>"lambda" { return LAMBDA; }
-<STATE_NOT_LINE_START>"pass" { return PASS; }
-<STATE_NOT_LINE_START>"continue" { return CONTINUE; }
-<STATE_NOT_LINE_START>"for" { return FOR; }
-<STATE_NOT_LINE_START>"load" { return LOAD; }
-<STATE_NOT_LINE_START>"return" { return RETURN; }
-<STATE_NOT_LINE_START>"def" { return DEF; }
-<STATE_NOT_LINE_START>"if" { return IF; }
-<STATE_NOT_LINE_START>"not" { return NOT; }
-<STATE_NOT_LINE_START>"while" { return WHILE; }
+<STATE_NOT_LINE_START>"and" { return yy::parser::token::AND; }
+<STATE_NOT_LINE_START>"elif" { return yy::parser::token::ELIF; }
+<STATE_NOT_LINE_START>"in" { return yy::parser::token::IN; }
+<STATE_NOT_LINE_START>"or" { return yy::parser::token::OR; }
+<STATE_NOT_LINE_START>"break" { return yy::parser::token::BREAK; }
+<STATE_NOT_LINE_START>"else" { return yy::parser::token::ELSE; }
+<STATE_NOT_LINE_START>"lambda" { return yy::parser::token::LAMBDA; }
+<STATE_NOT_LINE_START>"pass" { return yy::parser::token::PASS; }
+<STATE_NOT_LINE_START>"continue" { return yy::parser::token::CONTINUE; }
+<STATE_NOT_LINE_START>"for" { return yy::parser::token::FOR; }
+<STATE_NOT_LINE_START>"load" { return yy::parser::token::LOAD; }
+<STATE_NOT_LINE_START>"return" { return yy::parser::token::RETURN; }
+<STATE_NOT_LINE_START>"def" { return yy::parser::token::DEF; }
+<STATE_NOT_LINE_START>"if" { return yy::parser::token::IF; }
+<STATE_NOT_LINE_START>"not" { return yy::parser::token::NOT; }
+<STATE_NOT_LINE_START>"while" { return yy::parser::token::WHILE; }
 
 
 <STATE_NOT_LINE_START>{FLOAT} {
-    yylval.float_ = atof(yytext);
-    return FLOAT;
+    // yylval.float_ = atof(yytext);
+    return yy::parser::token::FLOAT;
 }
 
 <STATE_NOT_LINE_START>{INT} {
-    yylval.string = new_str(yytext, yyleng);
-    return INT;
+    // yylval.string = new_str(yytext, yyleng);
+    return yy::parser::token::INT;
 }
 
 <STATE_NOT_LINE_START>{IDENTIFIER} {
-    yylval.string = new_str(yytext, yyleng);
-    return IDENTIFIER;
+    // yylval.string = new_str(yytext, yyleng);
+    return yy::parser::token::IDENTIFIER;
 }
 
 <STATE_NOT_LINE_START>{STRING} {
-    yylval.string = new_str(yytext, yyleng);
-    return STRING;
+    // yylval.string = new_str(yytext, yyleng);
+    return yy::parser::token::STRING;
 }
 
 <STATE_NOT_LINE_START>{BYTES} {
-    yylval.string = new_str(yytext, yyleng);
-    return BYTES;
+    // yylval.string = new_str(yytext, yyleng);
+    return yy::parser::token::BYTES;
 }
 
 <STATE_NOT_LINE_START>. {

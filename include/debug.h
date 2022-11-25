@@ -3,10 +3,6 @@
 
 #include "types.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void print_statement_list(StatementList* s);
 void print_statement(Statement* s);
 void print_expr(Expr* e);
@@ -19,9 +15,5 @@ void print_list_comprehension(ListComprehension* e);
 void print_dict_comprehension(DictComprehension* e);
 void print_call_expr(CallExpr* e);
 void print_index_expr(IndexExpr* e);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

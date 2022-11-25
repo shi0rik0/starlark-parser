@@ -12,219 +12,209 @@ using namespace std;
 void print_token(int token, const YYSTYPE& value)
 {
     /*----- Print token names -----*/
-
     switch (token) {
-    case IDENTIFIER:
-        printf("identifier(%s)\n", value.string);
+    case yy::parser::token::IDENTIFIER:
+        printf("identifier(%s)\n", value.as<string>().c_str());
         break;
-    case INT:
-        printf("int(%s)\n", value.string);
+    case yy::parser::token::INT:
+        printf("int(%s)\n", value.as<string>().c_str());
         break;
-    case FLOAT:
-        printf("float(%f)\n", value.float_);
+    case yy::parser::token::FLOAT:
+        printf("float(%f)\n", value.as<double>());
         break;
-    case STRING:
-        printf("string(%s)\n", value.string);
+    case yy::parser::token::STRING:
+        printf("string(%s)\n", value.as<string>().c_str());
         break;
-    case BYTES:
+    case yy::parser::token::BYTES:
         printf("bytes\n");
         break;
-    case LIST:
-        printf("list\n");
-        break;
-    case TUPLE:
-        printf("tuple\n");
-        break;
-    case DICT:
-        printf("dict\n");
-        break;
-    case NEW_LINE:
+    case yy::parser::token::NEW_LINE:
         printf("new_line\n");
         break;
-    case INDENT:
+    case yy::parser::token::INDENT:
         printf("indent\n");
         break;
-    case ASSIGN:
+    case yy::parser::token::ASSIGN:
         printf("assign\n");
         break;
-    case ADD:
+    case yy::parser::token::ADD:
         printf("add\n");
         break;
-    case SUB:
+    case yy::parser::token::SUB:
         printf("sub\n");
         break;
-    case MUL:
+    case yy::parser::token::MUL:
         printf("mul\n");
         break;
-    case DIV:
+    case yy::parser::token::DIV:
         printf("div\n");
         break;
-    case FLOORDIV:
+    case yy::parser::token::FLOORDIV:
         printf("floordiv\n");
         break;
-    case MOD:
+    case yy::parser::token::MOD:
         printf("mod\n");
         break;
-    case POW:
+    case yy::parser::token::POW:
         printf("pow\n");
         break;
-    case RSHIFT:
+    case yy::parser::token::RSHIFT:
         printf("rshift\n");
         break;
-    case LSHIFT:
+    case yy::parser::token::LSHIFT:
         printf("lshift\n");
         break;
-    case BITAND:
+    case yy::parser::token::BITAND:
         printf("bitand\n");
         break;
-    case BITOR:
+    case yy::parser::token::BITOR:
         printf("bitor\n");
         break;
-    case XOR:
+    case yy::parser::token::XOR:
         printf("xor\n");
         break;
-    case IADD:
+    case yy::parser::token::IADD:
         printf("iadd\n");
         break;
-    case ISUB:
+    case yy::parser::token::ISUB:
         printf("isub\n");
         break;
-    case IMUL:
+    case yy::parser::token::IMUL:
         printf("imul\n");
         break;
-    case IDIV:
+    case yy::parser::token::IDIV:
         printf("idiv\n");
         break;
-    case IFLOORDIV:
+    case yy::parser::token::IFLOORDIV:
         printf("ifloordiv\n");
         break;
-    case IMOD:
+    case yy::parser::token::IMOD:
         printf("imod\n");
         break;
-    case IPOW:
+    case yy::parser::token::IPOW:
         printf("ipow\n");
         break;
-    case IRSHIFT:
+    case yy::parser::token::IRSHIFT:
         printf("irshift\n");
         break;
-    case ILSHIFT:
+    case yy::parser::token::ILSHIFT:
         printf("ilshift\n");
         break;
-    case IBITAND:
+    case yy::parser::token::IBITAND:
         printf("ibitand\n");
         break;
-    case IBITOR:
+    case yy::parser::token::IBITOR:
         printf("ibitor\n");
         break;
-    case IXOR:
+    case yy::parser::token::IXOR:
         printf("ixor\n");
         break;
-    case LT:
+    case yy::parser::token::LT:
         printf("lt\n");
         break;
-    case GT:
+    case yy::parser::token::GT:
         printf("gt\n");
         break;
-    case LE:
+    case yy::parser::token::LE:
         printf("le\n");
         break;
-    case GE:
+    case yy::parser::token::GE:
         printf("ge\n");
         break;
-    case EQ:
+    case yy::parser::token::EQ:
         printf("eq\n");
         break;
-    case NE:
+    case yy::parser::token::NE:
         printf("ne\n");
         break;
-    case POS:
+    case yy::parser::token::POS:
         printf("pos\n");
         break;
-    case NEG:
+    case yy::parser::token::NEG:
         printf("neg\n");
         break;
-    case INVERT:
+    case yy::parser::token::INVERT:
         printf("invert\n");
         break;
-    case DOT:
+    case yy::parser::token::DOT:
         printf("dot\n");
         break;
-    case COMMA:
+    case yy::parser::token::COMMA:
         printf("comma\n");
         break;
-    case SEMICOLON:
+    case yy::parser::token::SEMICOLON:
         printf("semicolon\n");
         break;
-    case COLON:
+    case yy::parser::token::COLON:
         printf("colon\n");
         break;
-    case LPAREN:
+    case yy::parser::token::LPAREN:
         printf("lparen\n");
         break;
-    case RPAREN:
+    case yy::parser::token::RPAREN:
         printf("rparen\n");
         break;
-    case LBRACKET:
+    case yy::parser::token::LBRACKET:
         printf("lbracket\n");
         break;
-    case RBRACKET:
+    case yy::parser::token::RBRACKET:
         printf("rbracket\n");
         break;
-    case LBRACE:
+    case yy::parser::token::LBRACE:
         printf("lbrace\n");
         break;
-    case RBRACE:
+    case yy::parser::token::RBRACE:
         printf("rbrace\n");
         break;
-    case AND:
+    case yy::parser::token::AND:
         printf("and\n");
         break;
-    case ELIF:
+    case yy::parser::token::ELIF:
         printf("elif\n");
         break;
-    case IN:
+    case yy::parser::token::IN:
         printf("in\n");
         break;
-    case OR:
+    case yy::parser::token::OR:
         printf("or\n");
         break;
-    case BREAK:
+    case yy::parser::token::BREAK:
         printf("break\n");
         break;
-    case ELSE:
+    case yy::parser::token::ELSE:
         printf("else\n");
         break;
-    case LAMBDA:
+    case yy::parser::token::LAMBDA:
         printf("lambda\n");
         break;
-    case PASS:
+    case yy::parser::token::PASS:
         printf("pass\n");
         break;
-    case CONTINUE:
+    case yy::parser::token::CONTINUE:
         printf("continue\n");
         break;
-    case FOR:
+    case yy::parser::token::FOR:
         printf("for\n");
         break;
-    case LOAD:
+    case yy::parser::token::LOAD:
         printf("load\n");
         break;
-    case RETURN:
+    case yy::parser::token::RETURN:
         printf("return\n");
         break;
-    case DEF:
+    case yy::parser::token::DEF:
         printf("def\n");
         break;
-    case IF:
+    case yy::parser::token::IF:
         printf("if\n");
         break;
-    case NOT:
+    case yy::parser::token::NOT:
         printf("not\n");
         break;
-    case WHILE:
+    case yy::parser::token::WHILE:
         printf("while\n");
         break;
-    case DEDENT:
+    case yy::parser::token::DEDENT:
         printf("dedent\n");
         break;
     default:

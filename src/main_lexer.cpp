@@ -1,14 +1,18 @@
 #include "lexer.h"
+#include "parser.h"
 #include "utils.h"
-int main(void) {
-    int c;
-  while (1) {
-    c = yylex();
-    if (c != 0) {
-      print_token(c);
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+    YYSTYPE yylval;
+    for (;;) {
+        int token = yylex(&yylval);
+        if (!token) {
+            break;
+        }
+        print_token(token, yylval);
     }
-    else {
-      break;
-    }
-  }
 }

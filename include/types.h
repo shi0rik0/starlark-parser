@@ -1,9 +1,8 @@
 #ifndef _F84986B2_6819_11ED_9F39_00155DC446E4
 #define _F84986B2_6819_11ED_9F39_00155DC446E4
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+struct NoneType {
+};
 
 struct Expr;
 
@@ -207,9 +206,5 @@ StatementList* new_statement_list(Statement* statement, StatementList* next);
 Statement* new_statement(Statement_Type type, void* data);
 Expr* new_expr(Expr_Type type, void* data);
 PrimaryExpr* new_primary_expr(PrimaryExpr_Type type, void* data);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

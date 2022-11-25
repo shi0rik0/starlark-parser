@@ -7,12 +7,10 @@
 
 int main(void)
 {
-
     StatementList* ret;
 
-    if (yyparse(&ret) == 0) {
-        puts("parse success");
-    }
+    yy::parser parser(&ret);
+    parser.parse();
 
     return 0;
 }

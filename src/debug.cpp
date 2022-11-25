@@ -73,7 +73,7 @@ void print_primary_expr(PrimaryExpr* e)
         printf("}");
     } break;
     case PrimaryExpr_Type_FLOAT:
-        printf("%f", e->data.float_);
+        printf("%f", *e->data.float_);
         break;
     case PrimaryExpr_Type_IDENTIFIER:
         printf("%s", e->data.identifier);
