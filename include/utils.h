@@ -4,8 +4,7 @@
 #include "parser.h"
 #include <string>
 
-char* new_str(char* str, int len);
-void print_token(int token, const YYSTYPE& value);
+std::string token_to_str(int token, const YYSTYPE& value);
 
 [[noreturn]] void fatal_error(const std::string& error_msg);
 

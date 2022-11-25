@@ -13,6 +13,6 @@ int main()
         if (!token) {
             break;
         }
-        print_token(token, yylval);
+        cout << token_to_str(token, yylval) << endl;
     }
 }

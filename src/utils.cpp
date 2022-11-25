@@ -1,238 +1,222 @@
 #include "utils.h"
 #include "parser.h"
 #include "types.h"
+#include <cstdarg>
 #include <iostream>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 using namespace std;
 
-void print_token(int token, const YYSTYPE& value)
+string token_to_str(int token, const YYSTYPE& value)
 {
-    /*----- Print token names -----*/
     switch (token) {
     case yy::parser::token::IDENTIFIER:
-        printf("identifier(%s)\n", value.as<string>().c_str());
+        return sprintfpp("identifier(%s)", value.as<string>().c_str());
         break;
     case yy::parser::token::INT:
-        printf("int(%s)\n", value.as<string>().c_str());
+        return sprintfpp("int(%s)", value.as<string>().c_str());
         break;
     case yy::parser::token::FLOAT:
-        printf("float(%f)\n", value.as<double>());
+        return sprintfpp("float(%f)", value.as<double>());
         break;
     case yy::parser::token::STRING:
-        printf("string(%s)\n", value.as<string>().c_str());
+        return sprintfpp("string(%s)", value.as<string>().c_str());
         break;
     case yy::parser::token::BYTES:
-        printf("bytes\n");
+        return sprintfpp("bytes");
         break;
     case yy::parser::token::NEW_LINE:
-        printf("new_line\n");
+        return sprintfpp("new_line");
         break;
     case yy::parser::token::INDENT:
-        printf("indent\n");
+        return sprintfpp("indent");
         break;
     case yy::parser::token::ASSIGN:
-        printf("assign\n");
+        return sprintfpp("assign");
         break;
     case yy::parser::token::ADD:
-        printf("add\n");
+        return sprintfpp("add");
         break;
     case yy::parser::token::SUB:
-        printf("sub\n");
+        return sprintfpp("sub");
         break;
     case yy::parser::token::MUL:
-        printf("mul\n");
+        return sprintfpp("mul");
         break;
     case yy::parser::token::DIV:
-        printf("div\n");
+        return sprintfpp("div");
         break;
     case yy::parser::token::FLOORDIV:
-        printf("floordiv\n");
+        return sprintfpp("floordiv");
         break;
     case yy::parser::token::MOD:
-        printf("mod\n");
+        return sprintfpp("mod");
         break;
     case yy::parser::token::POW:
-        printf("pow\n");
+        return sprintfpp("pow");
         break;
     case yy::parser::token::RSHIFT:
-        printf("rshift\n");
+        return sprintfpp("rshift");
         break;
     case yy::parser::token::LSHIFT:
-        printf("lshift\n");
+        return sprintfpp("lshift");
         break;
     case yy::parser::token::BITAND:
-        printf("bitand\n");
+        return sprintfpp("bitand");
         break;
     case yy::parser::token::BITOR:
-        printf("bitor\n");
+        return sprintfpp("bitor");
         break;
     case yy::parser::token::XOR:
-        printf("xor\n");
+        return sprintfpp("xor");
         break;
     case yy::parser::token::IADD:
-        printf("iadd\n");
+        return sprintfpp("iadd");
         break;
     case yy::parser::token::ISUB:
-        printf("isub\n");
+        return sprintfpp("isub");
         break;
     case yy::parser::token::IMUL:
-        printf("imul\n");
+        return sprintfpp("imul");
         break;
     case yy::parser::token::IDIV:
-        printf("idiv\n");
+        return sprintfpp("idiv");
         break;
     case yy::parser::token::IFLOORDIV:
-        printf("ifloordiv\n");
+        return sprintfpp("ifloordiv");
         break;
     case yy::parser::token::IMOD:
-        printf("imod\n");
+        return sprintfpp("imod");
         break;
     case yy::parser::token::IPOW:
-        printf("ipow\n");
+        return sprintfpp("ipow");
         break;
     case yy::parser::token::IRSHIFT:
-        printf("irshift\n");
+        return sprintfpp("irshift");
         break;
     case yy::parser::token::ILSHIFT:
-        printf("ilshift\n");
+        return sprintfpp("ilshift");
         break;
     case yy::parser::token::IBITAND:
-        printf("ibitand\n");
+        return sprintfpp("ibitand");
         break;
     case yy::parser::token::IBITOR:
-        printf("ibitor\n");
+        return sprintfpp("ibitor");
         break;
     case yy::parser::token::IXOR:
-        printf("ixor\n");
+        return sprintfpp("ixor");
         break;
     case yy::parser::token::LT:
-        printf("lt\n");
+        return sprintfpp("lt");
         break;
     case yy::parser::token::GT:
-        printf("gt\n");
+        return sprintfpp("gt");
         break;
     case yy::parser::token::LE:
-        printf("le\n");
+        return sprintfpp("le");
         break;
     case yy::parser::token::GE:
-        printf("ge\n");
+        return sprintfpp("ge");
         break;
     case yy::parser::token::EQ:
-        printf("eq\n");
+        return sprintfpp("eq");
         break;
     case yy::parser::token::NE:
-        printf("ne\n");
+        return sprintfpp("ne");
         break;
     case yy::parser::token::POS:
-        printf("pos\n");
+        return sprintfpp("pos");
         break;
     case yy::parser::token::NEG:
-        printf("neg\n");
+        return sprintfpp("neg");
         break;
     case yy::parser::token::INVERT:
-        printf("invert\n");
+        return sprintfpp("invert");
         break;
     case yy::parser::token::DOT:
-        printf("dot\n");
+        return sprintfpp("dot");
         break;
     case yy::parser::token::COMMA:
-        printf("comma\n");
+        return sprintfpp("comma");
         break;
     case yy::parser::token::SEMICOLON:
-        printf("semicolon\n");
+        return sprintfpp("semicolon");
         break;
     case yy::parser::token::COLON:
-        printf("colon\n");
+        return sprintfpp("colon");
         break;
     case yy::parser::token::LPAREN:
-        printf("lparen\n");
+        return sprintfpp("lparen");
         break;
     case yy::parser::token::RPAREN:
-        printf("rparen\n");
+        return sprintfpp("rparen");
         break;
     case yy::parser::token::LBRACKET:
-        printf("lbracket\n");
+        return sprintfpp("lbracket");
         break;
     case yy::parser::token::RBRACKET:
-        printf("rbracket\n");
+        return sprintfpp("rbracket");
         break;
     case yy::parser::token::LBRACE:
-        printf("lbrace\n");
+        return sprintfpp("lbrace");
         break;
     case yy::parser::token::RBRACE:
-        printf("rbrace\n");
+        return sprintfpp("rbrace");
         break;
     case yy::parser::token::AND:
-        printf("and\n");
+        return sprintfpp("and");
         break;
     case yy::parser::token::ELIF:
-        printf("elif\n");
+        return sprintfpp("elif");
         break;
     case yy::parser::token::IN:
-        printf("in\n");
+        return sprintfpp("in");
         break;
     case yy::parser::token::OR:
-        printf("or\n");
+        return sprintfpp("or");
         break;
     case yy::parser::token::BREAK:
-        printf("break\n");
+        return sprintfpp("break");
         break;
     case yy::parser::token::ELSE:
-        printf("else\n");
+        return sprintfpp("else");
         break;
     case yy::parser::token::LAMBDA:
-        printf("lambda\n");
+        return sprintfpp("lambda");
         break;
     case yy::parser::token::PASS:
-        printf("pass\n");
+        return sprintfpp("pass");
         break;
     case yy::parser::token::CONTINUE:
-        printf("continue\n");
+        return sprintfpp("continue");
         break;
     case yy::parser::token::FOR:
-        printf("for\n");
+        return sprintfpp("for");
         break;
     case yy::parser::token::LOAD:
-        printf("load\n");
+        return sprintfpp("load");
         break;
     case yy::parser::token::RETURN:
-        printf("return\n");
+        return sprintfpp("return");
         break;
     case yy::parser::token::DEF:
-        printf("def\n");
+        return sprintfpp("def");
         break;
     case yy::parser::token::IF:
-        printf("if\n");
+        return sprintfpp("if");
         break;
     case yy::parser::token::NOT:
-        printf("not\n");
+        return sprintfpp("not");
         break;
     case yy::parser::token::WHILE:
-        printf("while\n");
+        return sprintfpp("while");
         break;
     case yy::parser::token::DEDENT:
-        printf("dedent\n");
+        return sprintfpp("dedent");
         break;
     default:
         fatal_error("error: unknown token");
         break;
     }
-    /*-----  -----*/
-}
-
-char* new_str(char* str, int len)
-{
-    char* res = (char*)malloc(sizeof(char) * (len + 1));
-    if (res == NULL) {
-        fprintf(stderr, "Failure in malloc.\n");
-        exit(1);
-    }
-    strcpy(res, str);
-    return res;
 }
 
 void fatal_error(const std::string& error_msg)
