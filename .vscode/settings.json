@@ -6,5 +6,6 @@
         "utils.h": "cpp",
         "string.h": "cpp",
         "parser.h": "cpp"
-    }
+    },
+    "cmake.generator": "Unix Makefiles"
 }
