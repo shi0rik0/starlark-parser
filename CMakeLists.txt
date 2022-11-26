@@ -45,14 +45,11 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(
-  main_test
-  tests/main_test.cpp
-)
-target_link_libraries(
-  main_test
-  GTest::gtest_main
-)
+add_executable(main_test tests/main_test.cpp ${SRCS})
+target_include_directories(main_test PRIVATE ${INCLUDES})
+target_link_libraries(main_test GTest::gtest_main)
+target_compile_definitions(main_test PRIVATE WORKING_DIR="${CMAKE_SOURCE_DIR}/tests")
 
 include(GoogleTest)
 gtest_discover_tests(main_test)
+
