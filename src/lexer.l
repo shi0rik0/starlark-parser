@@ -17,6 +17,7 @@
     static int indent_length_temp = 0;
 
     static stack<int> indent_lengths;
+    static stack<char> braces;
     
     static char get_all_same(const char* str) {
         if (str == nullptr || str[0] == '\0') {
@@ -61,6 +62,9 @@ NL \n|\r\n
 }
 
 <INITIAL,STATE_LINE_START><<EOF>> {
+    if (!braces.empty()) {
+        fatal_error("error: lexer: missing closed braces");
+    }
     indent_length_temp = 0;
     BEGIN(STATE_DEDENT);
 }
@@ -68,14 +72,20 @@ NL \n|\r\n
 
     /* add a fake new line if the input doesn't end with a new line */
 <STATE_NOT_LINE_START><<EOF>> {
+    if (!braces.empty()) {
+        fatal_error("error: lexer: missing closed braces");
+    }
     BEGIN(STATE_LINE_START);
     return yy::parser::token::NEW_LINE;
 }
 
 
 <STATE_NOT_LINE_START>{NL} {
-    BEGIN(STATE_LINE_START);
-    return yy::parser::token::NEW_LINE;
+    // ignore new line if in braces
+    if (braces.empty()) {
+        BEGIN(STATE_LINE_START);
+        return yy::parser::token::NEW_LINE;
+    }
 }
 
 
@@ -188,12 +198,39 @@ NL \n|\r\n
 <STATE_NOT_LINE_START>";" { return yy::parser::token::SEMICOLON; }
 <STATE_NOT_LINE_START>":" { return yy::parser::token::COLON; }
 
-<STATE_NOT_LINE_START>"(" { return yy::parser::token::LPAREN; }
-<STATE_NOT_LINE_START>")" { return yy::parser::token::RPAREN; }
-<STATE_NOT_LINE_START>"[" { return yy::parser::token::LBRACKET; }
-<STATE_NOT_LINE_START>"]" { return yy::parser::token::RBRACKET; }
-<STATE_NOT_LINE_START>"{" { return yy::parser::token::LBRACE; }
-<STATE_NOT_LINE_START>"}" { return yy::parser::token::RBRACE; }
+<STATE_NOT_LINE_START>"(" {
+    braces.push('(');
+    return yy::parser::token::LPAREN;
+}
+<STATE_NOT_LINE_START>")" {
+    if (braces.empty() || braces.top() != '(') {
+        fatal_error("error: lexer: unmatched braces");
+    }
+    braces.pop();
+    return yy::parser::token::RPAREN;
+}
+<STATE_NOT_LINE_START>"[" {
+    braces.push('[');
+    return yy::parser::token::LBRACKET;
+}
+<STATE_NOT_LINE_START>"]" {
+    if (braces.empty() || braces.top() != '[') {
+        fatal_error("error: lexer: unmatched braces");
+    }
+    braces.pop();
+    return yy::parser::token::RBRACKET;
+}
+<STATE_NOT_LINE_START>"{" {
+    braces.push('{');
+    return yy::parser::token::LBRACE;
+}
+<STATE_NOT_LINE_START>"}" {
+    if (braces.empty() || braces.top() != '{') {
+        fatal_error("error: lexer: unmatched braces");
+    }
+    braces.pop();
+    return yy::parser::token::RBRACE;
+}
 
     /* Keywords */
 <STATE_NOT_LINE_START>"and" { return yy::parser::token::AND; }
@@ -215,27 +252,27 @@ NL \n|\r\n
 
 
 <STATE_NOT_LINE_START>{FLOAT} {
-    // yylval.float_ = atof(yytext);
+    yylval->emplace<double>(atof(yytext));
     return yy::parser::token::FLOAT;
 }
 
 <STATE_NOT_LINE_START>{INT} {
-    // yylval.string = new_str(yytext, yyleng);
+    yylval->emplace<string>(yytext);
     return yy::parser::token::INT;
 }
 
 <STATE_NOT_LINE_START>{IDENTIFIER} {
-    // yylval.string = new_str(yytext, yyleng);
+    yylval->emplace<string>(yytext);
     return yy::parser::token::IDENTIFIER;
 }
 
 <STATE_NOT_LINE_START>{STRING} {
-    // yylval.string = new_str(yytext, yyleng);
+    yylval->emplace<string>(yytext);
     return yy::parser::token::STRING;
 }
 
 <STATE_NOT_LINE_START>{BYTES} {
-    // yylval.string = new_str(yytext, yyleng);
+    yylval->emplace<string>(yytext);
     return yy::parser::token::BYTES;
 }
 
