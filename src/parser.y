@@ -1,6 +1,6 @@
 %language "c++"
 %define api.value.type variant
-%parse-param {StatementList **ret}
+%parse-param {std::vector<Statement>& ret}
 
 %code requires {
     #include "types.h"
@@ -16,8 +16,8 @@
 
 %code {
     #include "utils.h"
-    #include <stdio.h>
 
+    using namespace std;
     
     namespace yy
     {
@@ -30,7 +30,6 @@
 }
 
 
-// See PrimaryExpr_Type in <types.h>
 %token <std::string> IDENTIFIER
 %token <std::string> INT
 %token <double> FLOAT
@@ -41,22 +40,23 @@
 %token <NoneType> NEW_LINE INDENT DEDENT
 
 // Punctuations
-//            =
+//                =
 %token <NoneType> ASSIGN
-//            +   -   *   /   //       %   **  >>     <<     &      |     ^
+// binary op:     +   -   *   /   //       %   **  >>     <<     &      |     ^
 %token <NoneType> ADD SUB MUL DIV FLOORDIV MOD POW RSHIFT LSHIFT BITAND BITOR XOR
-//            +=   -=   *=   /=   //=       %=   **=  <<=     >>=     &=      |=     ^=
+//                +=   -=   *=   /=   //=       %=   **=  <<=     >>=     &=      |=     ^=
 %token <NoneType> IADD ISUB IMUL IDIV IFLOORDIV IMOD IPOW IRSHIFT ILSHIFT IBITAND IBITOR IXOR
-//            <  >  <= >= == !=
+// binary op:     <  >  <= >= == !=
 %token <NoneType> LT GT LE GE EQ NE
-//            +   -   ~
+// unary op:      +   -   ~
 %token <NoneType> POS NEG INVERT
-//            .   ,     ;         :
+//                .   ,     ;         :        PS: dot can be regarded as a binary op
 %token <NoneType> DOT COMMA SEMICOLON COLON
-//            (      )      [        ]        {      }
+//                (      )      [        ]        {      }
 %token <NoneType> LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 
 // Keywords
+// "not" is a unary op, and "and", "or", "in" and "not in" are binary ops.
 %token <NoneType> AND ELIF IN OR BREAK ELSE LAMBDA PASS CONTINUE FOR LOAD RETURN DEF IF NOT WHILE
 
 // Precedence and associativity
@@ -66,9 +66,13 @@
 %left UMINUS */
 
 /* %type <i> Start Expr */
-%type <StatementList*> Start Statements 
-%type <Statement*> ExprStatement
-%type <Expr*> Expr PrimaryExpr
+%type <std::vector<Statement>> Start Statements 
+%type <Statement> Statement
+%type <ExprStatement> ExprStatement
+%type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
+%type <Expr> Operand List Dict Tuple ListComp DictComp
+
+%start Start
 
 %%
 
@@ -76,36 +80,45 @@
 
 Start 
     : Statements {
-        // *ret = $1;
+        // ret = std::move($1);
     }
 ;
 
 Statements
-    : ExprStatement {
-        // $$ = new_statement_list($1, NULL);
+    : Statement {
+        // $$ = { $1 };
     }
-    | ExprStatement Statements {
-        // $$ = new_statement_list($1, $2);
+    | Statements Statement {
+        // $1.push_back($2);
+        // $$ = std::move($1);
+    }
+;
+
+Statement
+    : ExprStatement {
+        // $$ = Statement($1);
     }
 ;
 
 ExprStatement
     : Expr NEW_LINE {
-        // $$ = new_statement(Statement_Type_EXPR_STATEMENT, $1); 
+        // $$ = ExprStatement($1);
     }
 ;
 
 Expr
     : PrimaryExpr {
-        // $$ = $1;
-    }
-    | IDENTIFIER {
-        // $$ = $1;
+        $$ = std::move($1);
     }
 ;
 
 PrimaryExpr
-    : INT {
-        // $$ = new_primary_expr(PrimaryExpr_Type_INT, $1);
+    : Operand {
+        $$ = std::move($1);
     }
 
+Operand
+    : IDENTIFIER {
+        // $$ = Expr{.type = Expr::Type::IDENTIFIER, .data=make_unique<std::string*>($1)};
+    }
+;

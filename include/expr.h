@@ -132,4 +132,12 @@ struct Expr {
     Data data;
 };
 
+std::ostream& operator<<(std::ostream& os, const Expr& e);
+std::ostream& operator<<(std::ostream& os, const CallExpr& e);
+std::ostream& operator<<(std::ostream& os, const SliceExpr& e);
+std::ostream& operator<<(std::ostream& os, const LambdaExpr& e);
+std::ostream& operator<<(std::ostream& os, const DotExpr& e);
+std::ostream& operator<<(std::ostream& os, const ListComprehension& e);
+std::ostream& operator<<(std::ostream& os, const DictComprehension& e);
+
 #endif

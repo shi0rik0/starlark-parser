@@ -2,14 +2,19 @@
 #include "parser.h"
 #include "types.h"
 #include "utils.h"
-#include <stdio.h>
+
+using namespace std;
 
 int main(void)
 {
-    StatementList* ret;
+    vector<Statement> v;
 
-    yy::parser parser(&ret);
+    yy::parser parser(v);
     parser.parse();
+
+    for (const Statement& i : v) {
+        cout << i << endl;
+    }
 
     return 0;
 }

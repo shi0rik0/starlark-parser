@@ -1,9 +1,11 @@
+#include "expr.h"
 #include "lexer.h"
 #include "parser.h"
 #include <cstdio>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <memory>
 #include <string>
 
 using namespace std;
@@ -33,4 +35,17 @@ void test_lexer(const string& name)
 TEST(MainTest, TestLexer1)
 {
     test_lexer("1");
+}
+
+TEST(MainTest, TestExpr)
+{
+    DotExpr dot_expr;
+    dot_expr.attr = "ok";
+    dot_expr.obj = make_unique<Expr>();
+    dot_expr.obj->data = "ok";
+    dot_expr.obj->type = Expr::Type::STRING;
+    Expr expr;
+    expr.type = Expr::Type::DOT;
+    expr.data = std::move(dot_expr);
+    EXPECT_TRUE(get<DotExpr>(expr.data).attr == "ok");
 }
