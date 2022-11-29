@@ -132,6 +132,7 @@ struct Expr {
     Data data;
 };
 
+std::ostream& operator<<(std::ostream& os, Expr::Type t);
 std::ostream& operator<<(std::ostream& os, const Expr& e);
 std::ostream& operator<<(std::ostream& os, const CallExpr& e);
 std::ostream& operator<<(std::ostream& os, const SliceExpr& e);

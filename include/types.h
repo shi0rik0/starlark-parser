@@ -19,7 +19,7 @@ struct ExprStatement {
 };
 
 struct Statement {
-    typedef std::variant<std::monostate, ExprStatement> Data;
+    typedef std::variant<ExprStatement> Data;
     Data data;
 };
 
