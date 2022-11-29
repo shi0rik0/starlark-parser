@@ -9,6 +9,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#include <deque>
 
 struct Expr;
 
@@ -65,7 +66,7 @@ struct Expr {
         std::pair<PExpr, PExpr>,
         std::tuple<PExpr, PExpr, PExpr>,
         std::deque<Expr>,
-        Dict,
+        std::deque<std::pair<Expr, Expr>>,
         CallExpr,
         SliceExpr,
         LambdaExpr,
