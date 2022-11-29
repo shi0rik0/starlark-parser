@@ -323,14 +323,14 @@ ListItems:
     Expr {
         $$.emplace_front(std::move($1));
     }
-    /* | Expr COMMA ListItems {
+    | Expr COMMA ListItems {
         $3.emplace_front(std::move($1));
         $$ = std::move($3);
     }
     | Expr COMMA NEW_LINE ListItems {
         $4.emplace_front(std::move($1));
         $$ = std::move($4);
-    } */
+    }
 ;
 
 ListItems_WITHCOMMA:
