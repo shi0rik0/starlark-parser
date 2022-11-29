@@ -73,13 +73,24 @@ TEST(MainTest, TestParser2)
 
 TEST(MainTest, TestExpr)
 {
-    DotExpr dot_expr;
-    dot_expr.attr = "ok";
-    dot_expr.obj = make_unique<Expr>();
-    dot_expr.obj->data = "ok";
-    dot_expr.obj->type = Expr::Type::STRING;
-    Expr expr;
-    expr.type = Expr::Type::DOT;
-    expr.data = std::move(dot_expr);
-    EXPECT_TRUE(get<DotExpr>(expr.data).attr == "ok");
+    // atom
+    Expr id;
+    id.type = Expr::Type::STRING;
+    id.data = "var";
+
+    // unary expr
+    Expr uexpr;
+    uexpr.type = Expr::Type::INVERT;
+    uexpr.data = make_unique<Expr>(std::move(id));
+
+    // binary expr
+    Expr id1;
+    id1.type = Expr::Type::STRING;
+    id1.data = "var1";
+    Expr id2;
+    id2.type = Expr::Type::STRING;
+    id2.data = "var2";
+    Expr bexpr;
+    bexpr.type = Expr::Type::ADD;
+    bexpr.data = make_pair(make_unique<Expr>(std::move(id1)), make_unique<Expr>(std::move(id2)));
 }

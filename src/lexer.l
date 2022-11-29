@@ -33,7 +33,7 @@
     }
 %}
 
-
+BLANK [ \t]
 IDENTIFIER [_a-zA-Z][_a-zA-Z0-9]*
 INT [0-9]+
 FLOAT (([0-9]*\.[0-9]*)(e-?[0-9]+)?)|([0-9]+(e-?[0-9]+))
@@ -89,7 +89,7 @@ NL \n|\r\n
 }
 
 
-<STATE_LINE_START>[ \t]+ {
+<STATE_LINE_START>{BLANK}+ {
     static const char error_msg[] = "error: lexer: use both spaces and tabs for indent in line %d";
     char c = get_all_same(yytext);
     if (!c) {
@@ -115,7 +115,7 @@ NL \n|\r\n
 
 
     /* empty line */
-<STATE_LINE_START>[ \t]*{COMMENT}?{NL}? {
+<STATE_LINE_START>{BLANK}*{COMMENT}?{NL}? {
 }
 
 <STATE_DEDENT><<EOF>> {
@@ -149,7 +149,7 @@ NL \n|\r\n
     BEGIN(STATE_DEDENT);
 }
 
-<STATE_NOT_LINE_START>[ \t]+ {
+<STATE_NOT_LINE_START>{BLANK}+ {
 
 }
 
@@ -248,6 +248,7 @@ NL \n|\r\n
 <STATE_NOT_LINE_START>"def" { return yy::parser::token::DEF; }
 <STATE_NOT_LINE_START>"if" { return yy::parser::token::IF; }
 <STATE_NOT_LINE_START>"not" { return yy::parser::token::NOT; }
+<STATE_NOT_LINE_START>not{BLANK}+in { return yy::parser::token::NOT_IN; }
 <STATE_NOT_LINE_START>"while" { return yy::parser::token::WHILE; }
 
 

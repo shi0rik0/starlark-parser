@@ -53,6 +53,7 @@
 // binary op:     <  >  <= >= == !=
 %token <NoneType> LT GT LE GE EQ NE
 // unary op:      +   -   ~
+// POS and NEG are dummy tokens used to specify precedence. The lexer shouldn't return them.
 %token <NoneType> POS NEG INVERT
 //                .   ,     ;         :        PS: dot can be regarded as a binary op
 %token <NoneType> DOT COMMA SEMICOLON COLON
@@ -61,14 +62,14 @@
 
 // Keywords
 // "not" is a unary op, and "and", "or", "in" and "not in" are binary ops.
-%token <NoneType> AND ELIF IN OR BREAK ELSE LAMBDA PASS CONTINUE FOR LOAD RETURN DEF IF NOT WHILE
+%token <NoneType> AND ELIF IN OR BREAK ELSE LAMBDA PASS CONTINUE FOR LOAD RETURN DEF IF NOT WHILE NOT_IN
 
 // Precedence and associativity
 // ref: https://docs.python.org/3/reference/expressions.html#operator-precedence
 %left OR
 %left AND
 %left NOT
-%left LT GT LE GE EQ NE IN // TODO: should consider "not in" as a whole?
+%left LT GT LE GE EQ NE IN NOT_IN
 %left BITOR
 %left XOR
 %left BITAND
@@ -102,18 +103,18 @@ Statements
     }
     | Statement Statements {
         $2.emplace_front(std::move($1));
-        $$ = move($2);
+        $$ = std::move($2);
     }
     | CompoundStatement {
         for (auto it = $1.rbegin(); it != $1.rend(); ++it) {
-            $$.emplace_front(move(*it));
+            $$.emplace_front(std::move(*it));
         }
     }
     | CompoundStatement Statements {
         for (auto it = $1.rbegin(); it != $1.rend(); ++it) {
-            $2.emplace_front(move(*it));
+            $2.emplace_front(std::move(*it));
         }
-        $$ = move($2);
+        $$ = std::move($2);
     }
 ;
 
@@ -156,6 +157,12 @@ Expr
     : PrimaryExpr {
         $$ = std::move($1);
     }
+    | UnaryExpr {
+        $$ = std::move($1);
+    }
+    | BinaryExpr {
+        $$ = std::move($1);
+    }
 ;
 
 PrimaryExpr
@@ -194,5 +201,120 @@ Operand
         e.type = Expr::Type::BYTES;
         e.data = $1;
         $$ = std::move(e);
+    }
+;
+
+UnaryExpr
+    : ADD Expr %prec POS {
+        $$.type = Expr::Type::POS;
+        $$.data = make_unique<Expr>(std::move($2));
+    }
+    | SUB Expr %prec NEG {
+        $$.type = Expr::Type::NEG;
+        $$.data = make_unique<Expr>(std::move($2));
+    }
+    | NOT Expr {
+        $$.type = Expr::Type::NOT;
+        $$.data = make_unique<Expr>(std::move($2));
+    }
+    | INVERT Expr {
+        $$.type = Expr::Type::INVERT;
+        $$.data = make_unique<Expr>(std::move($2));
+    }
+;
+
+BinaryExpr
+    : Expr ADD Expr {
+        $$.type = Expr::Type::ADD;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+
+    | Expr ADD Expr {
+        $$.type = Expr::Type::ADD;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr SUB Expr {
+        $$.type = Expr::Type::SUB;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr MUL Expr {
+        $$.type = Expr::Type::MUL;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr DIV Expr {
+        $$.type = Expr::Type::DIV;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr FLOORDIV Expr {
+        $$.type = Expr::Type::FLOORDIV;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr MOD Expr {
+        $$.type = Expr::Type::MOD;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr POW Expr {
+        $$.type = Expr::Type::POW;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr RSHIFT Expr {
+        $$.type = Expr::Type::RSHIFT;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr LSHIFT Expr {
+        $$.type = Expr::Type::LSHIFT;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr BITAND Expr {
+        $$.type = Expr::Type::BITAND;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr BITOR Expr {
+        $$.type = Expr::Type::BITOR;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr XOR Expr {
+        $$.type = Expr::Type::XOR;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr LT Expr {
+        $$.type = Expr::Type::LT;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr GT Expr {
+        $$.type = Expr::Type::GT;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr LE Expr {
+        $$.type = Expr::Type::LE;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr GE Expr {
+        $$.type = Expr::Type::GE;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr EQ Expr {
+        $$.type = Expr::Type::EQ;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr NE Expr {
+        $$.type = Expr::Type::NE;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr AND Expr {
+        $$.type = Expr::Type::AND;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr OR Expr {
+        $$.type = Expr::Type::OR;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr IN Expr {
+        $$.type = Expr::Type::IN;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
+    }
+    | Expr NOT_IN Expr {
+        $$.type = Expr::Type::NOT_IN;
+        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
     }
 ;
