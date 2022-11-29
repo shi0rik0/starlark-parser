@@ -83,8 +83,9 @@
 %type <Statement> Statement SmallStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
-%type <std::deque<Expr>> ListItems
-%type <std::deque<std::pair<Expr, Expr>>> DictItems
+%type < Expr > Tuple_single
+%type < std::deque<Expr> > ListItems TupleItems// some Exprs concatenated with commas
+%type < std::deque< std::pair<Expr, Expr> > > DictItems
 
 %start Start
 
@@ -172,13 +173,19 @@ SmallStatement
 ;
 
 Expr
-    : PrimaryExpr {
+    : LPAREN Expr RPAREN {
+        $$ = (std::move($2));
+    } 
+    |PrimaryExpr {
         $$ = std::move($1);
     }
     | UnaryExpr {
         $$ = std::move($1);
     }
     | BinaryExpr {
+        $$ = std::move($1);
+    }
+    | Tuple {
         $$ = std::move($1);
     }
 ;
@@ -363,6 +370,58 @@ List
     }
 ; 
 
+TupleItems
+    : Expr {
+        $$.emplace_front(std::move($1));
+    }
+    | Expr COMMA {
+        $$.emplace_front(std::move($1));
+    }
+    | Expr COMMA TupleItems {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+;
+
+Tuple
+    : LPAREN RPAREN {
+        $$.type = Expr::Type::TUPLE;
+        $$.data = std::deque<Expr>();
+    } 
+    | LPAREN TupleItems RPAREN{
+        $$.type = Expr::Type::TUPLE;
+        $$.data = std::move($2);
+    }
+    |  TupleItems { //  need work. causes lots of sr and rr conflicts.
+        $$.type = Expr::Type::TUPLE;
+        $$.data = std::move($1);
+    }
+
+;
+
+DictItems
+    : Expr COLON Expr {
+        $$.emplace_front(make_pair(std::move($1), std::move($3)));
+    }
+    | Expr COLON Expr COMMA {
+        $$.emplace_front(make_pair(std::move($1), std::move($3)));
+    }
+    | Expr COLON Expr COMMA DictItems {
+        $5.emplace_front(make_pair(std::move($1), std::move($3)));
+        $$ = std::move($5);
+    }
+;
+
+Dict
+    : LBRACE RBRACE {
+        $$.type = Expr::Type::DICT;
+        $$.data = deque<pair<Expr,Expr>>();
+    } 
+    | LBRACE DictItems RBRACE {
+        $$.type = Expr::Type::DICT;
+        $$.data = std::move($2);
+    }
+;
 
 DictItems
     : Expr COLON Expr {
