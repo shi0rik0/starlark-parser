@@ -79,11 +79,13 @@
 %left POS NEG INVERT
 %right POW // TODO: POW seems to be more complicated. See https://docs.python.org/3/reference/expressions.html#the-power-operator
 
-%type <std::deque<Statement>> Start Statements CompoundStatement
+%type < std::deque<Statement> > Start Statements CompoundStatement
 %type <Statement> Statement SmallStatement
 %type <ExprStatement> ExprStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
+%type < std::deque<Expr> > ListItems ListItems_WITHCOMMA// some Exprs concatenated with commas
+%type < std::deque< std::pair<Expr, Expr> > > DictItems
 
 %start Start
 
@@ -133,7 +135,7 @@ CompoundStatement
     }
     | SmallStatement SEMICOLON CompoundStatement {
         $3.emplace_front(std::move($1));
-        $$ = move($3);
+        $$ = std::move($3);
     }
 ;
 
@@ -161,6 +163,9 @@ Expr
         $$ = std::move($1);
     }
     | BinaryExpr {
+        $$ = std::move($1);
+    }
+    | List {
         $$ = std::move($1);
     }
 ;
@@ -313,3 +318,42 @@ BinaryExpr
         $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
     }
 ;
+
+ListItems:
+    Expr {
+        $$.emplace_front(std::move($1));
+    }
+    /* | Expr COMMA ListItems {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+    | Expr COMMA NEW_LINE ListItems {
+        $4.emplace_front(std::move($1));
+        $$ = std::move($4);
+    } */
+;
+
+ListItems_WITHCOMMA:
+    ListItems COMMA{
+        $$ = std::move($1);
+    }
+;
+
+List: 
+    LBRACKET RBRACKET {
+        $$.type = Expr::Type::LIST;
+        std::deque<Expr> tmp;
+        $$.data = std::move(tmp);
+    } 
+    | LBRACKET ListItems RBRACKET {
+        $$.type = Expr::Type::LIST;
+        $$.data = std::move($2);
+        
+    }
+    | LBRACKET ListItems_WITHCOMMA RBRACKET {
+        cout << "test list comma" << endl;
+        $$.type = Expr::Type::LIST;
+        $$.data = std::move($2);
+    }
+; 
+
