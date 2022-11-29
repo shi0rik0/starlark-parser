@@ -52,6 +52,7 @@ struct Statement {
     Data data;
 };
 
+
 std::ostream& operator<<(std::ostream& os, const Statement& s);
 std::ostream& operator<<(std::ostream& os, const ExprStatement& s);
 std::ostream& operator<<(std::ostream& os, const ReturnStatement& s);
