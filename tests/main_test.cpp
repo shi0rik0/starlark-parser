@@ -75,7 +75,7 @@ TEST(MainTest, TestExpr)
 {
     // atom
     Expr id;
-    id.type = Expr::Type::STRING;
+    id.type = Expr::Type::IDENTIFIER;
     id.data = "var";
 
     // unary expr
@@ -85,10 +85,10 @@ TEST(MainTest, TestExpr)
 
     // binary expr
     Expr id1;
-    id1.type = Expr::Type::STRING;
+    id1.type = Expr::Type::IDENTIFIER;
     id1.data = "var1";
     Expr id2;
-    id2.type = Expr::Type::STRING;
+    id2.type = Expr::Type::IDENTIFIER;
     id2.data = "var2";
     Expr bexpr;
     bexpr.type = Expr::Type::ADD;
