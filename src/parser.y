@@ -319,39 +319,26 @@ BinaryExpr
     }
 ;
 
-ListItems:
-    Expr {
+ListItems
+    : Expr {
+        $$.emplace_front(std::move($1));
+    }
+    | Expr COMMA {
         $$.emplace_front(std::move($1));
     }
     | Expr COMMA ListItems {
         $3.emplace_front(std::move($1));
         $$ = std::move($3);
     }
-    | Expr COMMA NEW_LINE ListItems {
-        $4.emplace_front(std::move($1));
-        $$ = std::move($4);
-    }
 ;
 
-ListItems_WITHCOMMA:
-    ListItems COMMA{
-        $$ = std::move($1);
-    }
-;
 
-List: 
-    LBRACKET RBRACKET {
+List
+    : LBRACKET RBRACKET {
         $$.type = Expr::Type::LIST;
-        std::deque<Expr> tmp;
-        $$.data = std::move(tmp);
+        $$.data = std::deque<Expr>();
     } 
     | LBRACKET ListItems RBRACKET {
-        $$.type = Expr::Type::LIST;
-        $$.data = std::move($2);
-        
-    }
-    | LBRACKET ListItems_WITHCOMMA RBRACKET {
-        cout << "test list comma" << endl;
         $$.type = Expr::Type::LIST;
         $$.data = std::move($2);
     }
