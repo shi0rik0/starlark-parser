@@ -84,7 +84,8 @@
 %type <ExprStatement> ExprStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
-%type < std::deque<Expr> > ListItems ListItems_WITHCOMMA// some Exprs concatenated with commas
+%type < Expr > Tuple_single
+%type < std::deque<Expr> > ListItems TupleItems// some Exprs concatenated with commas
 %type < std::deque< std::pair<Expr, Expr> > > DictItems
 
 %start Start
@@ -156,7 +157,10 @@ ExprStatement
 ;
 
 Expr
-    : PrimaryExpr {
+    : LPAREN Expr RPAREN {
+        $$ = (std::move($2));
+    } 
+    |PrimaryExpr {
         $$ = std::move($1);
     }
     | UnaryExpr {
@@ -166,6 +170,9 @@ Expr
         $$ = std::move($1);
     }
     | List {
+        $$ = std::move($1);
+    }
+    | Tuple {
         $$ = std::move($1);
     }
 ;
@@ -344,3 +351,31 @@ List
     }
 ; 
 
+TupleItems
+    : Expr {
+        $$.emplace_front(std::move($1));
+    }
+    | Expr COMMA {
+        $$.emplace_front(std::move($1));
+    }
+    | Expr COMMA TupleItems {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+;
+
+Tuple
+    : LPAREN RPAREN {
+        $$.type = Expr::Type::TUPLE;
+        $$.data = std::deque<Expr>();
+    } 
+    | LPAREN TupleItems RPAREN{
+        $$.type = Expr::Type::TUPLE;
+        $$.data = std::move($2);
+    }
+    |  TupleItems { //  need work. causes lots of sr and rr conflicts.
+        $$.type = Expr::Type::TUPLE;
+        $$.data = std::move($1);
+    }
+
+;
