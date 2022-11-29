@@ -79,7 +79,7 @@
 %left POS NEG INVERT
 %right POW // TODO: POW seems to be more complicated. See https://docs.python.org/3/reference/expressions.html#the-power-operator
 
-%type <std::deque<Statement>> Start Statements CompoundStatement
+%type < std::deque<Statement> > Start Statements CompoundStatement
 %type <Statement> Statement SmallStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
@@ -135,7 +135,7 @@ CompoundStatement
     }
     | SmallStatement SEMICOLON CompoundStatement {
         $3.emplace_front(std::move($1));
-        $$ = std::move($3);
+        $$ = std::std::move($3);
     }
 ;
 
@@ -186,6 +186,9 @@ Expr
         $$ = std::move($1);
     }
     | Tuple {
+        $$ = std::move($1);
+    }
+    | List {
         $$ = std::move($1);
     }
 ;
