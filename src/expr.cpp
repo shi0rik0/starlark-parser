@@ -148,7 +148,11 @@ std::ostream& operator<<(std::ostream& os, const Expr& e)
         os << get<double>(e.data);
         break;
     case Expr::Type::LIST:
+        os << get<std::deque<Expr> >(e.data);
+        break;
     case Expr::Type::TUPLE:
+        os << get<std::deque<Expr> >(e.data);
+        break;
     case Expr::Type::DICT:
         FATAL_ERROR(string("TODO"));
         break;

@@ -219,6 +219,16 @@ string token_to_str(int token, const YYSTYPE& value)
     }
 }
 
+std::ostream& operator<<(std::ostream& os, const std::deque<Expr>& l){
+    for (auto it=l.begin(); it != l.end(); ++it){
+        os << *it;
+        if (std::next(it) != l.end()){
+            os << ",";
+        }
+    }
+    return os;
+}
+
 void fatal_error(const std::string& error_msg)
 {
     cerr << error_msg;
