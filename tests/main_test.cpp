@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 
 using namespace std;
@@ -29,12 +30,45 @@ void test_lexer(const string& name)
         }
         output += token_to_str(token, yylval) + '\n';
     }
-    EXPECT_TRUE(output == expected_output) << output;
+    EXPECT_TRUE(output == expected_output) << "[Actual]\n"
+                                           << output << "\n[Expected]\n"
+                                           << expected_output << endl;
+}
+
+void test_parser(const string& name)
+{
+    string program_file_path = string(WORKING_DIR) + "/programs/" + name + ".bzl";
+    FILE* fp = fopen(program_file_path.c_str(), "r");
+    EXPECT_TRUE(fp != nullptr);
+    yyin = fp;
+    string expected_output_path = string(WORKING_DIR) + "/expected_parser_output/" + name + ".txt";
+    ifstream ifs(expected_output_path);
+    EXPECT_TRUE(ifs.good());
+    string expected_output((istreambuf_iterator<char>(ifs)), (istreambuf_iterator<char>()));
+    stringstream output;
+
+    deque<Statement> v;
+
+    yy::parser parser(v);
+    parser.parse();
+
+    for (const Statement& i : v) {
+        output << i << endl;
+    }
+
+    EXPECT_TRUE(output.str() == expected_output) << "[Actual]\n"
+                                                 << output.str() << "\n[Expected]\n"
+                                                 << expected_output << endl;
 }
 
 TEST(MainTest, TestLexer1)
 {
     test_lexer("1");
+}
+
+TEST(MainTest, TestParser2)
+{
+    test_parser("2");
 }
 
 TEST(MainTest, TestExpr)

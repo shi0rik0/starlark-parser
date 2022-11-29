@@ -1,0 +1,4 @@
+INT(123)
+FLOAT(114.514)
+IDENTIFIER(var_name1)
+IDENTIFIER(var_name2)
