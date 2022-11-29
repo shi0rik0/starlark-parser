@@ -84,8 +84,12 @@
 %type <ExprStatement> ExprStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
+<<<<<<< HEAD
 %type < Expr > Tuple_single
 %type < std::deque<Expr> > ListItems TupleItems// some Exprs concatenated with commas
+=======
+%type < std::deque<Expr> > ListItems ListItems_WITHCOMMA// some Exprs concatenated with commas
+>>>>>>> f3b06497db37ae92430b54bcee2f1600236142ab
 %type < std::deque< std::pair<Expr, Expr> > > DictItems
 
 %start Start
@@ -172,9 +176,12 @@ Expr
     | List {
         $$ = std::move($1);
     }
+<<<<<<< HEAD
     | Tuple {
         $$ = std::move($1);
     }
+=======
+>>>>>>> f3b06497db37ae92430b54bcee2f1600236142ab
 ;
 
 PrimaryExpr
