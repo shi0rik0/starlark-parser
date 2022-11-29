@@ -3,3 +3,4 @@
 var_name1;var_name2
 -123
 var1 not in var2
+-2 * 3
