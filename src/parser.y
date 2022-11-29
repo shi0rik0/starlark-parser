@@ -1,13 +1,16 @@
 %language "c++"
 %define api.value.type variant
-%parse-param {std::vector<Statement>& ret}
+%parse-param {std::deque<Statement>& ret}
 
 %code requires {
+    // This part will be copied to the beginning of parser.h
     #include "types.h"
+    #include <deque>
 }
 
 %code provides
 {
+    // This part will be copied to the end of parser.h
     #define YY_DECL int yylex(yy::parser::semantic_type *yylval)
     YY_DECL;
     
@@ -15,6 +18,7 @@
 }
 
 %code {
+    // This part will be copied to parser.cpp
     #include "utils.h"
 
     using namespace std;
@@ -60,14 +64,22 @@
 %token <NoneType> AND ELIF IN OR BREAK ELSE LAMBDA PASS CONTINUE FOR LOAD RETURN DEF IF NOT WHILE
 
 // Precedence and associativity
+// ref: https://docs.python.org/3/reference/expressions.html#operator-precedence
+%left OR
+%left AND
+%left NOT
+%left LT GT LE GE EQ NE IN // TODO: should consider "not in" as a whole?
+%left BITOR
+%left XOR
+%left BITAND
+%left LSHIFT RSHIFT
+%left ADD SUB
+%left MUL DIV FLOORDIV MOD
+%left POS NEG INVERT
+%right POW // TODO: POW seems to be more complicated. See https://docs.python.org/3/reference/expressions.html#the-power-operator
 
-/* %left PLUS MINUS
-%left TIMES
-%left UMINUS */
-
-/* %type <i> Start Expr */
-%type <std::vector<Statement>> Start Statements 
-%type <Statement> Statement
+%type <std::deque<Statement>> Start Statements CompoundStatement
+%type <Statement> Statement SmallStatement
 %type <ExprStatement> ExprStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
@@ -80,29 +92,63 @@
 
 Start 
     : Statements {
-        // ret = std::move($1);
+        ret = std::move($1);
     }
 ;
 
 Statements
     : Statement {
-        // $$ = { $1 };
+        $$.emplace_front(std::move($1));
     }
-    | Statements Statement {
-        // $1.push_back($2);
-        // $$ = std::move($1);
+    | Statement Statements {
+        $2.emplace_front(std::move($1));
+        $$ = move($2);
+    }
+    | CompoundStatement {
+        for (auto it = $1.rbegin(); it != $1.rend(); ++it) {
+            $$.emplace_front(move(*it));
+        }
+    }
+    | CompoundStatement Statements {
+        for (auto it = $1.rbegin(); it != $1.rend(); ++it) {
+            $2.emplace_front(move(*it));
+        }
+        $$ = move($2);
     }
 ;
 
 Statement
+    : INVERT {
+        
+    }
+;
+
+CompoundStatement
+    : SmallStatement NEW_LINE {
+        $$.emplace_front(std::move($1));
+    }
+    | SmallStatement SEMICOLON NEW_LINE {
+        $$.emplace_front(std::move($1));
+    }
+    | SmallStatement SEMICOLON CompoundStatement {
+        $3.emplace_front(std::move($1));
+        $$ = move($3);
+    }
+;
+
+SmallStatement
     : ExprStatement {
-        // $$ = Statement($1);
+        Statement s;
+        s.data = std::move($1);
+        $$ = std::move(s);
     }
 ;
 
 ExprStatement
-    : Expr NEW_LINE {
-        // $$ = ExprStatement($1);
+    : Expr {
+        ExprStatement e;
+        e.expr = std::move($1);
+        $$ = std::move(e);
     }
 ;
 
@@ -116,9 +162,37 @@ PrimaryExpr
     : Operand {
         $$ = std::move($1);
     }
+;
 
 Operand
     : IDENTIFIER {
-        // $$ = Expr{.type = Expr::Type::IDENTIFIER, .data=make_unique<std::string*>($1)};
+        Expr e;
+        e.type = Expr::Type::IDENTIFIER;
+        e.data = $1;
+        $$ = std::move(e);
+    }
+    | INT {
+        Expr e;
+        e.type = Expr::Type::INT;
+        e.data = $1;
+        $$ = std::move(e);
+    }
+    | FLOAT {
+        Expr e;
+        e.type = Expr::Type::FLOAT;
+        e.data = $1;
+        $$ = std::move(e);
+    }
+    | STRING {
+        Expr e;
+        e.type = Expr::Type::STRING;
+        e.data = $1;
+        $$ = std::move(e);
+    }
+    | BYTES {
+        Expr e;
+        e.type = Expr::Type::BYTES;
+        e.data = $1;
+        $$ = std::move(e);
     }
 ;

@@ -7,7 +7,7 @@ using namespace std;
 
 int main(void)
 {
-    vector<Statement> v;
+    deque<Statement> v;
 
     yy::parser parser(v);
     parser.parse();
