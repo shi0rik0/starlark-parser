@@ -228,11 +228,6 @@ BinaryExpr
         $$.type = Expr::Type::ADD;
         $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
     }
-
-    | Expr ADD Expr {
-        $$.type = Expr::Type::ADD;
-        $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
-    }
     | Expr SUB Expr {
         $$.type = Expr::Type::SUB;
         $$.data = make_pair(make_unique<Expr>(std::move($1)), make_unique<Expr>(std::move($3)));
