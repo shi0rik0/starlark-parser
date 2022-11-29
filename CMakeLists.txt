@@ -27,9 +27,11 @@ set(INCLUDES "${PARSER_DIR}" "include")
 
 add_executable(parser "src/main_parser.cpp" ${SRCS})
 target_include_directories(parser PRIVATE ${INCLUDES})
+target_compile_definitions(parser PRIVATE DEBUG)
 
 add_executable(lexer "src/main_lexer.cpp" ${SRCS})
 target_include_directories(lexer PRIVATE ${INCLUDES})
+target_compile_definitions(lexer PRIVATE DEBUG)
 
 
 ### import GoogleTest
