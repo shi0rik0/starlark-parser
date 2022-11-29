@@ -1,20 +1,35 @@
+RELEASE := 0
+
+ifeq ($(RELEASE),0)
+# debug
+CMAKE_BUILD_TYPE := Debug
+else
+	ifeq ($(RELEASE),1)
+# release
+CMAKE_BUILD_TYPE := Release
+	else
+$(error RELEASE should be 0 or 1)
+	endif
+endif
+
 .PHONY: all
 all: lexer parser unittest;
 
 .PHONY: lexer
 lexer: build
-	cmake --build build --target lexer
+	cmake --build build --target lexer -j 18
 
 .PHONY: parser
 parser: build
-	cmake --build build --target parser
+	cmake --build build --target parser -j 18
 
 .PHONY: unittest
 unittest: build
-	cmake --build build --target main_test
+	cmake --build build --target main_test -j 18
 
 build: CMakeLists.txt
-	cmake -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -Bbuild
+	cmake -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc \
+		  -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -Bbuild
 
 .PHONY: run-lexer
 run-lexer: lexer

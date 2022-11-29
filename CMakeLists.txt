@@ -1,13 +1,21 @@
 cmake_minimum_required(VERSION 3.14)
 
 # suppress warning about DOWNLOAD_EXTRACT_TIMESTAMP
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-		cmake_policy(SET CMP0135 NEW)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+	cmake_policy(SET CMP0135 NEW)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
 
 project(StarlarkParser)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(MACRO DEBUG)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(MACRO RELEASE)
+else()
+    message(FATAL_ERROR "You should assign CMAKE_BUILD_TYPE to either Debug or Release.")
+endif()
 
 set(SRC_DIR "src")
 set(PARSER_DIR "${CMAKE_CURRENT_BINARY_DIR}")
@@ -27,19 +35,19 @@ set(INCLUDES "${PARSER_DIR}" "include")
 
 add_executable(parser "src/main_parser.cpp" ${SRCS})
 target_include_directories(parser PRIVATE ${INCLUDES})
-target_compile_definitions(parser PRIVATE DEBUG)
+target_compile_definitions(parser PRIVATE ${MACRO})
 
 add_executable(lexer "src/main_lexer.cpp" ${SRCS})
 target_include_directories(lexer PRIVATE ${INCLUDES})
-target_compile_definitions(lexer PRIVATE DEBUG)
+target_compile_definitions(lexer PRIVATE ${MACRO})
 
 
 ### import GoogleTest
 
 include(FetchContent)
 FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    googletest
+    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -50,7 +58,7 @@ enable_testing()
 add_executable(main_test tests/main_test.cpp ${SRCS})
 target_include_directories(main_test PRIVATE ${INCLUDES})
 target_link_libraries(main_test GTest::gtest_main)
-target_compile_definitions(main_test PRIVATE WORKING_DIR="${CMAKE_SOURCE_DIR}/tests")
+target_compile_definitions(main_test PRIVATE WORKING_DIR="${CMAKE_SOURCE_DIR}/tests" ${MACRO})
 
 include(GoogleTest)
 gtest_discover_tests(main_test)
