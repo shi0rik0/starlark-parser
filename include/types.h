@@ -11,6 +11,10 @@
 #include <variant>
 #include <vector>
 
+struct Statement;
+
+typedef std::deque<Statement> Statements;
+
 struct NoneType {
 };
 
@@ -39,6 +43,22 @@ struct LoadStatement {
     // TODO
 };
 
+struct IfStatement {
+    std::deque<std::pair<Expr, Statements>> if_elif_branches;
+    std::optional<Statements> else_branch;
+};
+
+struct ForStatement {
+    std::deque<Expr> vars;
+    Expr iterator;
+    Statements body;
+};
+
+struct DefStatement {
+    std::deque<Argument> parameters;
+    Statements body;
+};
+
 struct AssignStatement {
     Expr leftval, rightval;
 };
@@ -51,7 +71,10 @@ struct Statement {
         ContinueStatement,
         PassStatement,
         AssignStatement,
-        LoadStatement>
+        LoadStatement,
+        IfStatement,
+        ForStatement,
+        DefStatement>
         Data;
     Data data;
 };

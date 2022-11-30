@@ -17,16 +17,18 @@ typedef std::unique_ptr<Expr> PExpr;
 
 typedef std::string Identifier;
 
+enum class PositionalArgumentType {
+    NORMAL, // f(x)
+    AS_SEQUENCE, // f(*x)
+    AS_DICT, // f(**x)
+};
+
+typedef std::variant<std::pair<PositionalArgumentType, PExpr>,
+    std::pair<Identifier, PExpr>>
+    Argument;
+
 struct CallExpr {
-    enum class PositionalArgumentType {
-        NORMAL, // f(x)
-        AS_SEQUENCE, // f(*x)
-        AS_DICT, // f(**x)
-    };
     PExpr callee;
-    typedef std::variant<std::pair<PositionalArgumentType, PExpr>,
-        std::pair<Identifier, PExpr>>
-        Argument;
     std::vector<Argument> arguments;
 };
 
