@@ -29,7 +29,7 @@ unittest: build
 
 build: CMakeLists.txt
 	cmake -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc \
-		  -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -Bbuild
+		  -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -Bbuild -G "Unix Makefiles"
 
 .PHONY: run-lexer
 run-lexer: lexer
