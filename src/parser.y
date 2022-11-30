@@ -233,6 +233,9 @@ Operand
     | List {
         $$ = std::move($1);
     }
+    | Tuple {
+        $$ = std::move($1);
+    }
     | Dict {
         $$ = std::move($1);
     }
