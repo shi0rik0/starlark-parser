@@ -79,13 +79,12 @@
 %left POS NEG INVERT
 %right POW // TODO: POW seems to be more complicated. See https://docs.python.org/3/reference/expressions.html#the-power-operator
 
-%type < std::deque<Statement> > Start Statements CompoundStatement
+%type <std::deque<Statement>> Start Statements CompoundStatement
 %type <Statement> Statement SmallStatement
-%type <ExprStatement> ExprStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
-%type < std::deque<Expr> > ListItems
-%type < std::deque< std::pair<Expr, Expr> > > DictItems
+%type <std::deque<Expr>> ListItems
+%type <std::deque<std::pair<Expr, Expr>>> DictItems
 
 %start Start
 
@@ -139,19 +138,36 @@ CompoundStatement
     }
 ;
 
+
 SmallStatement
-    : ExprStatement {
+    : Expr {
+        ExprStatement es;
+        es.expr = std::move($1);
         Statement s;
-        s.data = std::move($1);
+        s.data = std::move(es);
         $$ = std::move(s);
     }
-;
-
-ExprStatement
-    : Expr {
-        ExprStatement e;
-        e.expr = std::move($1);
-        $$ = std::move(e);
+    | RETURN Expr {
+        ReturnStatement rs;
+        rs.return_val = std::move($2);
+        Statement s;
+        s.data = std::move(rs);
+        $$ = std::move(s);
+    }
+    | BREAK {
+        Statement s;
+        s.data = BreakStatement();
+        $$ = std::move(s);
+    }
+    | CONTINUE {
+        Statement s;
+        s.data = ContinueStatement();
+        $$ = std::move(s);
+    }
+    | PASS {
+        Statement s;
+        s.data = PassStatement();
+        $$ = std::move(s);
     }
 ;
 

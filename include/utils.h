@@ -13,10 +13,10 @@ std::string sprintfpp(const char* format, ...);
 
 std::ostream& operator<<(std::ostream& os, const std::deque<Expr>& l);
 
-// @msg should be a std::string
-#define FATAL_ERROR(msg)                                                             \
-    do {                                                                             \
-        fatal_error(sprintfpp("error: %s:%d: %s", __FILE__, __LINE__, msg.c_str())); \
+// @msg can be std::string or const char*
+#define FATAL_ERROR(msg)                                                      \
+    do {                                                                      \
+        fatal_error(sprintfpp("error: %s:%d: ", __FILE__, __LINE__) + (msg)); \
     } while (false)
 
 #ifdef DEBUG

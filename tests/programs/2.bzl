@@ -7,3 +7,7 @@ var1 not in var2
 [1,2,3,]
 {var: 
 "hello", 0: [1,2,3]}
+return a
+break
+continue
+pass
