@@ -219,10 +219,11 @@ string token_to_str(int token, const YYSTYPE& value)
     }
 }
 
-std::ostream& operator<<(std::ostream& os, const std::deque<Expr>& l){
-    for (auto it=l.begin(); it != l.end(); ++it){
+std::ostream& operator<<(std::ostream& os, const std::deque<Expr>& l)
+{
+    for (auto it = l.begin(); it != l.end(); ++it) {
         os << *it;
-        if (std::next(it) != l.end()){
+        if (std::next(it) != l.end()) {
             os << ",";
         }
     }

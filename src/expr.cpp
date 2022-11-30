@@ -148,13 +148,13 @@ std::ostream& operator<<(std::ostream& os, const Expr& e)
         os << get<double>(e.data);
         break;
     case Expr::Type::LIST:
-        os << get<std::deque<Expr> >(e.data);
+        os << get<std::deque<Expr>>(e.data);
         break;
     case Expr::Type::TUPLE:
-        os << get<std::deque<Expr> >(e.data);
+        os << get<std::deque<Expr>>(e.data);
         break;
     case Expr::Type::DICT:
-        FATAL_ERROR(string("TODO"));
+        print_dict(os, get<Expr::Dict>(e.data));
         break;
     case Expr::Type::POS:
     case Expr::Type::NEG:
@@ -242,4 +242,15 @@ std::ostream& operator<<(std::ostream& os, const DictComprehension& e)
 {
     FATAL_ERROR(string("TODO"));
     return os;
+}
+
+void print_dict(std::ostream& os, const Expr::Dict& d)
+{
+    static const char SEP_0[] = "";
+    static const char SEP_1[] = ",";
+    const char* sep = SEP_0;
+    for (const pair<Expr, Expr>& i : d) {
+        os << sep << i.first << ":" << i.second;
+        sep = SEP_1;
+    }
 }
