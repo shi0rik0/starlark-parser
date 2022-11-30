@@ -1,13 +1,14 @@
 #ifndef EXPR_H
 #define EXPR_H
 
+#include <deque>
 #include <memory>
 #include <optional>
+#include <ostream>
 #include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>
-#include <deque>
 
 struct Expr;
 
@@ -56,6 +57,7 @@ struct DictComprehension {
 };
 
 struct Expr {
+    typedef std::deque<std::pair<Expr, Expr>> Dict;
     typedef std::variant<
         std::string,
         double,
@@ -63,7 +65,7 @@ struct Expr {
         std::pair<PExpr, PExpr>,
         std::tuple<PExpr, PExpr, PExpr>,
         std::deque<Expr>,
-        std::deque<std::pair<Expr, Expr>>,
+        Dict,
         CallExpr,
         SliceExpr,
         LambdaExpr,
@@ -141,5 +143,7 @@ std::ostream& operator<<(std::ostream& os, const LambdaExpr& e);
 std::ostream& operator<<(std::ostream& os, const DotExpr& e);
 std::ostream& operator<<(std::ostream& os, const ListComprehension& e);
 std::ostream& operator<<(std::ostream& os, const DictComprehension& e);
+
+void print_dict(std::ostream& os, const Expr::Dict& d);
 
 #endif

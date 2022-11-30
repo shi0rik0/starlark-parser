@@ -84,7 +84,7 @@
 %type <ExprStatement> ExprStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
-%type < std::deque<Expr> > ListItems ListItems_WITHCOMMA// some Exprs concatenated with commas
+%type < std::deque<Expr> > ListItems
 %type < std::deque< std::pair<Expr, Expr> > > DictItems
 
 %start Start
@@ -165,9 +165,6 @@ Expr
     | BinaryExpr {
         $$ = std::move($1);
     }
-    | List {
-        $$ = std::move($1);
-    }
 ;
 
 PrimaryExpr
@@ -206,6 +203,12 @@ Operand
         e.type = Expr::Type::BYTES;
         e.data = $1;
         $$ = std::move(e);
+    }
+    | List {
+        $$ = std::move($1);
+    }
+    | Dict {
+        $$ = std::move($1);
     }
 ;
 
@@ -344,3 +347,27 @@ List
     }
 ; 
 
+
+DictItems
+    : Expr COLON Expr {
+        $$.emplace_front(make_pair(std::move($1), std::move($3)));
+    }
+    | Expr COLON Expr COMMA {
+        $$.emplace_front(make_pair(std::move($1), std::move($3)));
+    }
+    | Expr COLON Expr COMMA DictItems {
+        $5.emplace_front(make_pair(std::move($1), std::move($3)));
+        $$ = std::move($5);
+    }
+;
+
+Dict
+    : LBRACE RBRACE {
+        $$.type = Expr::Type::DICT;
+        $$.data = deque<pair<Expr,Expr>>();
+    } 
+    | LBRACE DictItems RBRACE {
+        $$.type = Expr::Type::DICT;
+        $$.data = std::move($2);
+    }
+;
