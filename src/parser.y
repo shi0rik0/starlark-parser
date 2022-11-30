@@ -83,8 +83,8 @@
 %type <Statement> Statement SmallStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Operand List Dict Tuple ListComp DictComp
-%type < Expr > Tuple_single
-%type < std::deque<Expr> > ListItems TupleItems// some Exprs concatenated with commas
+%type < std::deque<Expr> > TupleItems TupleItems_NoComma        
+%type < std::deque<Expr> > ListItems                      // should have higher priority than TupleItems
 %type < std::deque< std::pair<Expr, Expr> > > DictItems
 
 %start Start
@@ -389,6 +389,17 @@ TupleItems
     }
 ;
 
+TupleItems_NoComma
+    : Expr {
+        $$.emplace_front(std::move($1));
+    }
+    | Expr COMMA TupleItems_NoComma {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+;
+
+
 Tuple
     : LPAREN RPAREN {
         $$.type = Expr::Type::TUPLE;
@@ -398,7 +409,7 @@ Tuple
         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($2);
     }
-    |  TupleItems { //  need work. causes lots of sr and rr conflicts.
+    |  TupleItems_NoComma {
         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($1);
     }
