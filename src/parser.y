@@ -230,6 +230,9 @@ Operand
     | List {
         $$ = std::move($1);
     }
+    | Tuple {
+        $$ = std::move($1);
+    }
     | Dict {
         $$ = std::move($1);
     }
@@ -423,28 +426,3 @@ Dict
     }
 ;
 
-TupleItems
-    | Expr COMMA {
-        $$.emplace_front(std::move($1));
-    }
-    | Expr COMMA TupleItems {
-        $3.emplace_front(std::move($1));
-        $$ = std::move($3);
-    }
-;
-
-Tuple
-    : LPAREN RPAREN {
-        $$.type = Expr::Type::TUPLE;
-        $$.data = std::deque<Expr>();
-    } 
-    | LPAREN TupleItems RPAREN{
-        $$.type = Expr::Type::TUPLE;
-        $$.data = std::move($2);
-    }
-    |  TupleItems { //  need work. causes lots of sr and rr conflicts.
-        $$.type = Expr::Type::TUPLE;
-        $$.data = std::move($1);
-    }
-
-;
