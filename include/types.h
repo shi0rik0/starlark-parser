@@ -49,8 +49,8 @@ struct IfStatement {
 };
 
 struct ForStatement {
-    std::deque<Expr> vars;
-    Expr iterator;
+    std::deque<Expr> for_what;
+    Expr in_what;
     Statements body;
 };
 

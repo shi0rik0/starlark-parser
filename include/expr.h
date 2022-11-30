@@ -51,12 +51,25 @@ struct DotExpr {
     Identifier attr;
 };
 
+struct ForClause {
+    std::deque<Expr> for_what;
+    PExpr in_what;
+};
+
+struct IfClause {
+    PExpr condition;
+};
+
+typedef std::variant<ForClause, IfClause> ComprehensionClause;
+
 struct ListComprehension {
-    // TODO
+    PExpr item;
+    std::deque<ComprehensionClause> clauses;
 };
 
 struct DictComprehension {
-    // TODO
+    std::pair<PExpr, PExpr> item;
+    std::deque<ComprehensionClause> clauses;
 };
 
 struct Expr {
