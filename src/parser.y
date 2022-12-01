@@ -82,8 +82,10 @@
 %type < std::deque<Statement> > Start Statements CompoundStatement
 %type <Statement> Statement SmallStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
-%type <Expr> Operand List Dict Tuple ListComp DictComp
-%type < std::deque<Expr> > TupleItems TupleItems_NoComma        
+%type <Expr> Expr_Loose 
+%type <Expr> Operand List Dict Tuple Tuple_NoParen ListComp DictComp
+%type < std::deque<Expr> > TupleItems  
+%type < std::deque<Expr> > TupleItems_NoComma      
 %type < std::deque<Expr> > ListItems                      // should have higher priority than TupleItems
 %type < std::deque< std::pair<Expr, Expr> > > DictItems
 
@@ -141,18 +143,26 @@ CompoundStatement
 
 
 SmallStatement
-    : Expr {
+    : Expr_Loose {
         ExprStatement es;
         es.expr = std::move($1);
         Statement s;
         s.data = std::move(es);
         $$ = std::move(s);
     }
-    | RETURN Expr {
+    | RETURN Expr_Loose {
         ReturnStatement rs;
         rs.return_val = std::move($2);
         Statement s;
         s.data = std::move(rs);
+        $$ = std::move(s);
+    }
+    | Expr_Loose ASSIGN Expr_Loose {
+        AssignStatement asgn;
+        asgn.leftval = std::move($1);
+        asgn.rightval = std::move($3);
+        Statement s;
+        s.data = std::move(asgn);
         $$ = std::move(s);
     }
     | BREAK {
@@ -185,14 +195,16 @@ Expr
     | BinaryExpr {
         $$ = std::move($1);
     }
-    | Tuple {
+;
+
+Expr_Loose
+    : Expr {
         $$ = std::move($1);
     }
-    | List {
+    | Tuple_NoParen {
         $$ = std::move($1);
     }
 ;
-
 PrimaryExpr
     : Operand {
         $$ = std::move($1);
@@ -376,11 +388,9 @@ List
     }
 ; 
 
-TupleItems
-    : Expr {
-        $$.emplace_front(std::move($1));
-    }
-    | Expr COMMA {
+// with trailing comma. e.g.   1, 2, 3, 
+TupleItems 
+    : Expr COMMA {
         $$.emplace_front(std::move($1));
     }
     | Expr COMMA TupleItems {
@@ -389,8 +399,10 @@ TupleItems
     }
 ;
 
+// without trailing comma. e.g.   1, 2, 3
 TupleItems_NoComma
     : Expr COMMA Expr {
+        $$.emplace_front(std::move($3));
         $$.emplace_front(std::move($1));
     }
     | Expr COMMA TupleItems_NoComma {
@@ -409,8 +421,19 @@ Tuple
         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($2);
     }
-    |  TupleItems_NoComma {
+    | LPAREN TupleItems_NoComma RPAREN{
         $$.type = Expr::Type::TUPLE;
+        $$.data = std::move($2);
+    }
+;
+
+Tuple_NoParen
+    : TupleItems {
+         $$.type = Expr::Type::TUPLE;
+        $$.data = std::move($1);
+    }
+    | TupleItems_NoComma {
+         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($1);
     }
 ;
@@ -439,26 +462,3 @@ Dict
     }
 ;
 
-DictItems
-    : Expr COLON Expr {
-        $$.emplace_front(make_pair(std::move($1), std::move($3)));
-    }
-    | Expr COLON Expr COMMA {
-        $$.emplace_front(make_pair(std::move($1), std::move($3)));
-    }
-    | Expr COLON Expr COMMA DictItems {
-        $5.emplace_front(make_pair(std::move($1), std::move($3)));
-        $$ = std::move($5);
-    }
-;
-
-Dict
-    : LBRACE RBRACE {
-        $$.type = Expr::Type::DICT;
-        $$.data = deque<pair<Expr,Expr>>();
-    } 
-    | LBRACE DictItems RBRACE {
-        $$.type = Expr::Type::DICT;
-        $$.data = std::move($2);
-    }
-;

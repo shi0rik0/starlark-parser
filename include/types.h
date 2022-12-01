@@ -39,6 +39,27 @@ struct LoadStatement {
     // TODO
 };
 
+struct ReturnStatement {
+    Expr return_val;
+};
+
+struct BreakStatement {
+};
+
+struct ContinueStatement {
+};
+
+struct PassStatement {
+};
+
+struct AssignStatement {
+    Expr leftval, rightval;
+};
+
+struct LoadStatement {
+    // TODO
+};
+
 struct Statement {
     typedef std::variant<
         ExprStatement,
@@ -46,7 +67,7 @@ struct Statement {
         BreakStatement,
         ContinueStatement,
         PassStatement,
-        AssginStatement,
+        AssignStatement,
         LoadStatement>
         Data;
     Data data;
@@ -59,5 +80,6 @@ std::ostream& operator<<(std::ostream& os, const ReturnStatement& s);
 std::ostream& operator<<(std::ostream& os, const BreakStatement& s);
 std::ostream& operator<<(std::ostream& os, const ContinueStatement& s);
 std::ostream& operator<<(std::ostream& os, const PassStatement& s);
+std::ostream& operator<<(std::ostream& os, const AssignStatement& s);
 
 #endif
