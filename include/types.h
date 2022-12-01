@@ -49,7 +49,7 @@ struct IfStatement {
 };
 
 struct ForStatement {
-    std::deque<Expr> for_what;
+    Expr for_what;
     Expr in_what;
     Statements body;
 };
@@ -85,6 +85,7 @@ std::ostream& operator<<(std::ostream& os, const ReturnStatement& s);
 std::ostream& operator<<(std::ostream& os, const BreakStatement& s);
 std::ostream& operator<<(std::ostream& os, const ContinueStatement& s);
 std::ostream& operator<<(std::ostream& os, const PassStatement& s);
+std::ostream& operator<<(std::ostream& os, const IfStatement& s);
 std::ostream& operator<<(std::ostream& os, const AssignStatement& s);
 
 #endif

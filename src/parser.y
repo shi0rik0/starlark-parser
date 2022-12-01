@@ -79,8 +79,16 @@
 %left POS NEG INVERT
 %right POW // TODO: POW seems to be more complicated. See https://docs.python.org/3/reference/expressions.html#the-power-operator
 
-%type < std::deque<Statement> > Start Statements CompoundStatement
-%type <Statement> Statement SmallStatement
+%type <Statements> Start Statements CompoundStatement
+%type <Statement> BlockStatement SmallStatement
+%type <IfStatement> IfStatement
+%type <std::pair<Expr, Statements>> IfPart
+%type <std::deque<std::pair<Expr, Statements>>> ElifPart
+%type <Statements> ElsePart
+%type <Statements> IfBranchBody
+// %type <DefStatement> DefStatement
+// %type <ForStatement> ForStatement
+%type <Expr> Expr_Loose
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Expr_Loose 
 %type <Expr> Operand List Dict Tuple Tuple_NoParen ListComp DictComp
@@ -102,10 +110,10 @@ Start
 ;
 
 Statements
-    : Statement {
+    : BlockStatement {
         $$.emplace_front(std::move($1));
     }
-    | Statement Statements {
+    | BlockStatement Statements {
         $2.emplace_front(std::move($1));
         $$ = std::move($2);
     }
@@ -122,9 +130,70 @@ Statements
     }
 ;
 
-Statement
-    : INVERT {
-        
+BlockStatement
+    : IfStatement {
+        $$.data = std::move($1);
+    }
+    /* | ForStatement {
+        $$.data = std::move($1);
+    }
+    | DefStatement {
+        $$.data = std::move($1);
+    } */
+;
+
+
+IfStatement
+    : IfPart {
+        $$.if_elif_branches.emplace_front(std::move($1));
+    }
+    | IfPart ElsePart {
+        $$.if_elif_branches.emplace_front(std::move($1));
+        $$.else_branch = std::move($2);
+    }
+    | IfPart ElifPart {
+        $$.if_elif_branches.emplace_front(std::move($1));
+        for (auto it = $2.rbegin(); it != $2.rend(); ++it) {
+            $$.if_elif_branches.emplace_front(std::move(*it));
+        }
+    }
+    | IfPart ElifPart ElsePart {
+        $$.if_elif_branches.emplace_front(std::move($1));
+        for (auto it = $2.rbegin(); it != $2.rend(); ++it) {
+            $$.if_elif_branches.emplace_front(std::move(*it));
+        }
+        $$.else_branch = std::move($3);
+    }
+;
+
+IfPart
+    : IF Expr COLON IfBranchBody {
+        $$ = make_pair(std::move($2), std::move($4));
+    }
+;
+
+ElifPart
+    : ELIF Expr COLON IfBranchBody {
+        $$.emplace_front(make_pair(std::move($2), std::move($4)));
+    }
+    | ELIF Expr COLON IfBranchBody ElifPart {
+        $5.emplace_front(make_pair(std::move($2), std::move($4)));
+        $$ = std::move($5);
+    }
+;
+
+ElsePart
+    : ELSE COLON IfBranchBody {
+        $$ = std::move($3);
+    }
+;
+
+IfBranchBody
+    : CompoundStatement {
+        $$ = std::move($1);
+    }
+    | NEW_LINE INDENT Statements DEDENT {
+        $$ = std::move($3);
     }
 ;
 
@@ -179,6 +248,12 @@ SmallStatement
         Statement s;
         s.data = PassStatement();
         $$ = std::move(s);
+    }
+;
+
+Expr_Loose
+    : Expr {
+        $$ = std::move($1);
     }
 ;
 
