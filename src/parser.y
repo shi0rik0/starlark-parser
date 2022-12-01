@@ -137,7 +137,7 @@ CompoundStatement
     }
     | SmallStatement SEMICOLON CompoundStatement {
         $3.emplace_front(std::move($1));
-        $$ = std::std::move($3);
+        $$ = std::move($3);
     }
 ;
 
@@ -186,7 +186,7 @@ Expr
     : LPAREN Expr RPAREN {
         $$ = (std::move($2));
     } 
-    |PrimaryExpr {
+    | PrimaryExpr {
         $$ = std::move($1);
     }
     | UnaryExpr {

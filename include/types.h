@@ -39,25 +39,8 @@ struct LoadStatement {
     // TODO
 };
 
-struct ReturnStatement {
-    Expr return_val;
-};
-
-struct BreakStatement {
-};
-
-struct ContinueStatement {
-};
-
-struct PassStatement {
-};
-
 struct AssignStatement {
     Expr leftval, rightval;
-};
-
-struct LoadStatement {
-    // TODO
 };
 
 struct Statement {
@@ -72,7 +55,6 @@ struct Statement {
         Data;
     Data data;
 };
-
 
 std::ostream& operator<<(std::ostream& os, const Statement& s);
 std::ostream& operator<<(std::ostream& os, const ExprStatement& s);
