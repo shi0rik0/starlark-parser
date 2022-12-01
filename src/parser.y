@@ -85,17 +85,18 @@
 %type <std::pair<Expr, Statements>> IfPart
 %type <std::deque<std::pair<Expr, Statements>>> ElifPart
 %type <Statements> ElsePart
-%type <Statements> IfBranchBody
+%type <Statements> BlockBody
 // %type <DefStatement> DefStatement
-// %type <ForStatement> ForStatement
-%type <Expr> Expr_Loose
+%type <ForStatement> ForStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
-%type <Expr> Expr_Loose 
+%type <Expr> Expr_Loose
 %type <Expr> Operand List Dict Tuple Tuple_NoParen ListComp DictComp
-%type < std::deque<Expr> > TupleItems  
-%type < std::deque<Expr> > TupleItems_NoComma      
-%type < std::deque<Expr> > ListItems                      // should have higher priority than TupleItems
-%type < std::deque< std::pair<Expr, Expr> > > DictItems
+%type <std::deque<Expr>> ListItems
+%type <std::deque<Expr>> TupleItems
+%type <std::deque<std::pair<Expr, Expr>>> DictItems
+%type <Expr> ForLoopVars
+%type <Expr> ForLoopVars_Tuple_NoParen
+%type <std::deque<Expr>> ForLoopVars_TupleItems
 
 %start Start
 
@@ -134,10 +135,10 @@ BlockStatement
     : IfStatement {
         $$.data = std::move($1);
     }
-    /* | ForStatement {
+    | ForStatement {
         $$.data = std::move($1);
     }
-    | DefStatement {
+    /* | DefStatement {
         $$.data = std::move($1);
     } */
 ;
@@ -167,28 +168,36 @@ IfStatement
 ;
 
 IfPart
-    : IF Expr COLON IfBranchBody {
+    : IF Expr COLON BlockBody {
         $$ = make_pair(std::move($2), std::move($4));
     }
 ;
 
 ElifPart
-    : ELIF Expr COLON IfBranchBody {
+    : ELIF Expr COLON BlockBody {
         $$.emplace_front(make_pair(std::move($2), std::move($4)));
     }
-    | ELIF Expr COLON IfBranchBody ElifPart {
+    | ELIF Expr COLON BlockBody ElifPart {
         $5.emplace_front(make_pair(std::move($2), std::move($4)));
         $$ = std::move($5);
     }
 ;
 
 ElsePart
-    : ELSE COLON IfBranchBody {
+    : ELSE COLON BlockBody {
         $$ = std::move($3);
     }
 ;
 
-IfBranchBody
+ForStatement
+    : FOR ForLoopVars IN Expr_Loose COLON BlockBody {
+        $$.for_what = std::move($2);
+        $$.in_what = std::move($4);
+        $$.body = std::move($6);
+    }
+;
+
+BlockBody
     : CompoundStatement {
         $$ = std::move($1);
     }
@@ -251,12 +260,6 @@ SmallStatement
     }
 ;
 
-Expr_Loose
-    : Expr {
-        $$ = std::move($1);
-    }
-;
-
 Expr
     : LPAREN Expr RPAREN {
         $$ = (std::move($2));
@@ -280,6 +283,7 @@ Expr_Loose
         $$ = std::move($1);
     }
 ;
+
 PrimaryExpr
     : Operand {
         $$ = std::move($1);
@@ -463,24 +467,15 @@ List
     }
 ; 
 
-// with trailing comma. e.g.   1, 2, 3, 
 TupleItems 
     : Expr COMMA {
         $$.emplace_front(std::move($1));
     }
-    | Expr COMMA TupleItems {
-        $3.emplace_front(std::move($1));
-        $$ = std::move($3);
-    }
-;
-
-// without trailing comma. e.g.   1, 2, 3
-TupleItems_NoComma
-    : Expr COMMA Expr {
+    | Expr COMMA Expr {
         $$.emplace_front(std::move($3));
         $$.emplace_front(std::move($1));
     }
-    | Expr COMMA TupleItems_NoComma {
+    | Expr COMMA TupleItems {
         $3.emplace_front(std::move($1));
         $$ = std::move($3);
     }
@@ -496,19 +491,11 @@ Tuple
         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($2);
     }
-    | LPAREN TupleItems_NoComma RPAREN{
-        $$.type = Expr::Type::TUPLE;
-        $$.data = std::move($2);
-    }
 ;
 
 Tuple_NoParen
     : TupleItems {
-         $$.type = Expr::Type::TUPLE;
-        $$.data = std::move($1);
-    }
-    | TupleItems_NoComma {
-         $$.type = Expr::Type::TUPLE;
+        $$.type = Expr::Type::TUPLE;
         $$.data = std::move($1);
     }
 ;
@@ -537,3 +524,33 @@ Dict
     }
 ;
 
+ForLoopVars
+    : PrimaryExpr {
+        $$ = std::move($1);
+    }
+    | ForLoopVars_Tuple_NoParen {
+        $$ = std::move($1);
+    }
+;
+
+ForLoopVars_TupleItems 
+    : PrimaryExpr COMMA {
+        $$.emplace_front(std::move($1));
+    }
+    | PrimaryExpr COMMA PrimaryExpr {
+        $$.emplace_front(std::move($3));
+        $$.emplace_front(std::move($1));
+    }
+    | PrimaryExpr COMMA ForLoopVars_TupleItems {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+;
+
+
+ForLoopVars_Tuple_NoParen
+    : ForLoopVars_TupleItems {
+        $$.type = Expr::Type::TUPLE;
+        $$.data = std::move($1);
+    }
+;
