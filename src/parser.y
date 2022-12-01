@@ -157,6 +157,14 @@ SmallStatement
         s.data = std::move(rs);
         $$ = std::move(s);
     }
+    | Expr_Loose ASSIGN Expr_Loose {
+        AssignStatement asgn;
+        asgn.leftval = std::move($1);
+        asgn.rightval = std::move($3);
+        Statement s;
+        s.data = std::move(asgn);
+        $$ = std::move(s);
+    }
     | BREAK {
         Statement s;
         s.data = BreakStatement();

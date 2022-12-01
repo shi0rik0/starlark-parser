@@ -15,10 +15,14 @@ std::ostream& operator<<(std::ostream& os, const Statement& s)
         os << "ContinueStatement(" << *p << ")";
     } else if (auto p = get_if<PassStatement>(&s.data)) {
         os << "PassStatement(" << *p << ")";
-    } else {
-        FATAL_ERROR("TODO");
+    } else if (auto p = get_if<AssignStatement>(&s.data)) {
+        os << "AssignStatement(" << *p << ")";
     }
-
+    else{
+        FATAL_ERROR("TODO");
+    }    
+    
+    
     return os;
 }
 
@@ -31,6 +35,12 @@ std::ostream& operator<<(std::ostream& os, const ExprStatement& s)
 std::ostream& operator<<(std::ostream& os, const ReturnStatement& s)
 {
     os << s.return_val;
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const AssignStatement& s)
+{
+    os << s.leftval << " = " << s.rightval;
     return os;
 }
 

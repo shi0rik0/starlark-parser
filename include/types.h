@@ -31,8 +31,8 @@ struct ContinueStatement {
 struct PassStatement {
 };
 
-struct AssginStatement {
-    // TODO
+struct AssignStatement {
+    Expr leftval, rightval;
 };
 
 struct LoadStatement {
@@ -46,7 +46,7 @@ struct Statement {
         BreakStatement,
         ContinueStatement,
         PassStatement,
-        AssginStatement,
+        AssignStatement,
         LoadStatement>
         Data;
     Data data;
@@ -59,5 +59,6 @@ std::ostream& operator<<(std::ostream& os, const ReturnStatement& s);
 std::ostream& operator<<(std::ostream& os, const BreakStatement& s);
 std::ostream& operator<<(std::ostream& os, const ContinueStatement& s);
 std::ostream& operator<<(std::ostream& os, const PassStatement& s);
+std::ostream& operator<<(std::ostream& os, const AssignStatement& s);
 
 #endif
