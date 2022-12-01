@@ -59,6 +59,8 @@
 %token <NoneType> DOT COMMA SEMICOLON COLON
 //                (      )      [        ]        {      }
 %token <NoneType> LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
+// dummy tokens for * and ** in parameters or arguments
+%token <NoneType> STAR DOUBLE_STAR
 
 // Keywords
 // "not" is a unary op, and "and", "or", "in" and "not in" are binary ops.
@@ -66,6 +68,8 @@
 
 // Precedence and associativity
 // ref: https://docs.python.org/3/reference/expressions.html#operator-precedence
+%left STAR DOUBLE_STAR
+%left ASSIGN
 %left OR
 %left AND
 %left NOT
@@ -86,7 +90,7 @@
 %type <std::deque<std::pair<Expr, Statements>>> ElifPart
 %type <Statements> ElsePart
 %type <Statements> BlockBody
-// %type <DefStatement> DefStatement
+%type <DefStatement> DefStatement
 %type <ForStatement> ForStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
 %type <Expr> Expr_Loose
@@ -97,6 +101,10 @@
 %type <Expr> ForLoopVars
 %type <Expr> ForLoopVars_Tuple_NoParen
 %type <std::deque<Expr>> ForLoopVars_TupleItems
+%type <std::deque<Parameter>> Parameters
+%type <Parameter> Parameter
+%type <std::deque<Argument>> Arguments
+%type <Argument> Argument
 
 %start Start
 
@@ -138,9 +146,9 @@ BlockStatement
     | ForStatement {
         $$.data = std::move($1);
     }
-    /* | DefStatement {
+    | DefStatement {
         $$.data = std::move($1);
-    } */
+    }
 ;
 
 
@@ -194,6 +202,13 @@ ForStatement
         $$.for_what = std::move($2);
         $$.in_what = std::move($4);
         $$.body = std::move($6);
+    }
+;
+
+DefStatement
+    : DEF IDENTIFIER LPAREN Parameters RPAREN COLON BlockBody {
+        $$.parameters = std::move($4);
+        $$.body = std::move($7);
     }
 ;
 
@@ -552,5 +567,37 @@ ForLoopVars_Tuple_NoParen
     : ForLoopVars_TupleItems {
         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($1);
+    }
+;
+
+Parameters
+    : Parameter {
+        $$.emplace_front(std::move($1));
+    }
+    | Parameter COMMA {
+        $$.emplace_front(std::move($1));
+    }
+    | Parameter COMMA Parameters {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+;
+
+Parameter
+    : IDENTIFIER {
+        $$.type = Parameter::NORMAL();
+        $$.name = std::move($1);
+    }
+    | MUL IDENTIFIER %prec STAR {
+        $$.type = Parameter::ARGS();
+        $$.name = std::move($2);
+    }
+    | POW IDENTIFIER %prec DOUBLE_STAR {
+        $$.type = Parameter::KWARGS();
+        $$.name = std::move($2);
+    }
+    | IDENTIFIER ASSIGN Expr {
+        $$.type = std::move($3);
+        $$.name = std::move($1);
     }
 ;

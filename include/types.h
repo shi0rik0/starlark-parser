@@ -35,12 +35,13 @@ struct ContinueStatement {
 struct PassStatement {
 };
 
-struct AssginStatement {
+struct LoadStatement {
     // TODO
 };
 
-struct LoadStatement {
-    // TODO
+struct AssignStatement {
+    Expr leftval;
+    Expr rightval;
 };
 
 struct IfStatement {
@@ -54,13 +55,22 @@ struct ForStatement {
     Statements body;
 };
 
-struct DefStatement {
-    std::deque<Argument> parameters;
-    Statements body;
+struct Parameter {
+    struct NORMAL { };
+    struct ARGS { };
+    struct KWARGS { };
+    typedef std::variant<NORMAL, ARGS, KWARGS, Expr> Type;
+    // x     -> type == NORMAL()
+    // *x    -> type == ARGS()
+    // **x   -> type == KWARGS()
+    // x = 1 -> type == Expr(1)
+    Type type;
+    Identifier name;
 };
 
-struct AssignStatement {
-    Expr leftval, rightval;
+struct DefStatement {
+    std::deque<Parameter> parameters;
+    Statements body;
 };
 
 struct Statement {
@@ -88,5 +98,6 @@ std::ostream& operator<<(std::ostream& os, const PassStatement& s);
 std::ostream& operator<<(std::ostream& os, const IfStatement& s);
 std::ostream& operator<<(std::ostream& os, const AssignStatement& s);
 std::ostream& operator<<(std::ostream& os, const ForStatement& s);
+std::ostream& operator<<(std::ostream& os, const DefStatement& s);
 
 #endif

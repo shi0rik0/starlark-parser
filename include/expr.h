@@ -9,7 +9,6 @@
 #include <utility>
 #include <variant>
 #include <vector>
-#include <deque>
 
 struct Expr;
 
@@ -17,19 +16,22 @@ typedef std::unique_ptr<Expr> PExpr;
 
 typedef std::string Identifier;
 
-enum class PositionalArgumentType {
-    NORMAL, // f(x)
-    AS_SEQUENCE, // f(*x)
-    AS_DICT, // f(**x)
+struct Argument {
+    struct NORMAL { };
+    struct UNPACK_SEQUENCE { };
+    struct UNPACK_DICT { };
+    typedef std::variant<NORMAL, UNPACK_SEQUENCE, UNPACK_DICT, std::string> Type;
+    // a     -> type == NORMAL()
+    // *a    -> type == UNPACK_SEQUENCE()
+    // **a   -> type == UNPACK_DICT()
+    // x = a -> type == "x"
+    Type type;
+    PExpr value;
 };
-
-typedef std::variant<std::pair<PositionalArgumentType, PExpr>,
-    std::pair<Identifier, PExpr>>
-    Argument;
 
 struct CallExpr {
     PExpr callee;
-    std::vector<Argument> arguments;
+    std::deque<Argument> arguments;
 };
 
 struct SliceExpr {
@@ -42,7 +44,7 @@ struct SliceExpr {
 };
 
 struct LambdaExpr {
-    std::vector<Identifier> arguments;
+    std::deque<Identifier> arguments;
     PExpr return_val;
 };
 

@@ -21,6 +21,8 @@ std::ostream& operator<<(std::ostream& os, const Statement& s)
         os << "AssignStatement(" << *p << ")";
     } else if (auto p = get_if<ForStatement>(&s.data)) {
         os << "ForStatement(" << *p << ")";
+    } else if (auto p = get_if<DefStatement>(&s.data)) {
+        os << "DefStatement(" << *p << ")";
     } else {
         FATAL_ERROR("TODO");
     }
@@ -68,6 +70,12 @@ std::ostream& operator<<(std::ostream& os, const IfStatement& s)
 }
 
 std::ostream& operator<<(std::ostream& os, const ForStatement& s)
+{
+    os << "TODO";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const DefStatement& s)
 {
     os << "TODO";
     return os;
