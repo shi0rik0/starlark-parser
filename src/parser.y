@@ -390,7 +390,7 @@ TupleItems
 ;
 
 TupleItems_NoComma
-    : Expr {
+    : Expr COMMA Expr {
         $$.emplace_front(std::move($1));
     }
     | Expr COMMA TupleItems_NoComma {
