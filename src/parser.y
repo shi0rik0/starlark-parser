@@ -413,7 +413,6 @@ Tuple
         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($1);
     }
-
 ;
 
 DictItems
