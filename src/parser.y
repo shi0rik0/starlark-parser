@@ -185,9 +185,6 @@ Expr
     | BinaryExpr {
         $$ = std::move($1);
     }
-    | List {
-        $$ = std::move($1);
-    }
 ;
 
 PrimaryExpr
@@ -410,7 +407,6 @@ Tuple
         $$.type = Expr::Type::TUPLE;
         $$.data = std::move($1);
     }
-
 ;
 
 DictItems
