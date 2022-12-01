@@ -46,3 +46,8 @@ test: lexer parser unittest
 .PHONY: clean
 clean:
 	rm -rf build
+
+.PHONY: bison-verbose
+bison-verbose:
+	bison src/parser.y --output=/dev/null \
+	--verbose --report-file=temp/bison-verbose.txt > temp/bison-warnings.txt 2>&1
