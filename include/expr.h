@@ -44,7 +44,7 @@ struct SliceExpr {
 };
 
 struct LambdaExpr {
-    std::deque<Identifier> arguments;
+    std::deque<Identifier> parameters;
     PExpr return_val;
 };
 
@@ -54,7 +54,7 @@ struct DotExpr {
 };
 
 struct ForClause {
-    std::deque<Expr> for_what;
+    PExpr for_what;
     PExpr in_what;
 };
 
