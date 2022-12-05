@@ -20,7 +20,7 @@ struct Argument {
     struct NORMAL { };
     struct UNPACK_SEQUENCE { };
     struct UNPACK_DICT { };
-    typedef std::variant<NORMAL, UNPACK_SEQUENCE, UNPACK_DICT, std::string> Type;
+    typedef std::variant<NORMAL, UNPACK_SEQUENCE, UNPACK_DICT, Identifier> Type;
     // a     -> type == NORMAL()
     // *a    -> type == UNPACK_SEQUENCE()
     // **a   -> type == UNPACK_DICT()
@@ -74,6 +74,9 @@ struct DictComprehension {
     std::deque<ComprehensionClause> clauses;
 };
 
+struct IfExpr {
+};
+
 struct Expr {
     typedef std::deque<std::pair<Expr, Expr>> Dict;
     typedef std::variant<
@@ -89,7 +92,8 @@ struct Expr {
         LambdaExpr,
         DotExpr,
         ListComprehension,
-        DictComprehension>
+        DictComprehension,
+        IfExpr>
         Data;
     enum class Type {
         // atomic
@@ -161,6 +165,7 @@ std::ostream& operator<<(std::ostream& os, const LambdaExpr& e);
 std::ostream& operator<<(std::ostream& os, const DotExpr& e);
 std::ostream& operator<<(std::ostream& os, const ListComprehension& e);
 std::ostream& operator<<(std::ostream& os, const DictComprehension& e);
+std::ostream& operator<<(std::ostream& os, const Argument& arg);
 
 void print_dict(std::ostream& os, const Expr::Dict& d);
 

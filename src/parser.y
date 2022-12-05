@@ -92,7 +92,7 @@
 %type <Statements> BlockBody
 %type <DefStatement> DefStatement
 %type <ForStatement> ForStatement
-%type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr
+%type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr DotExpr SliceExpr CallExpr
 %type <Expr> Expr_Loose
 %type <Expr> Operand List Dict Tuple Tuple_NoParen ListComp DictComp
 %type <std::deque<Expr>> ListItems
@@ -288,6 +288,9 @@ Expr
     | BinaryExpr {
         $$ = std::move($1);
     }
+    | IfExpr {
+        $$ = std::move($1);
+    }
 ;
 
 Expr_Loose
@@ -303,8 +306,79 @@ PrimaryExpr
     : Operand {
         $$ = std::move($1);
     }
+    | DotExpr {
+        $$ = std::move($1);
+    } 
+    | SliceExpr {
+        $$ = std::move($1);
+    }
+    | CallExpr {
+        $$ = std::move($1);
+    }
 ;
 
+DotExpr
+    : PrimaryExpr DOT IDENTIFIER {
+        Expr e;
+        e.type = Expr::Type::DOT;
+        DotExpr de;
+        de.obj = make_unique<Expr>(std::move($1));
+        de.attr = std::move($3);
+        e.data = std::move(de);
+        $$ = std::move(e);
+    }
+;
+
+SliceExpr 
+    : PrimaryExpr LBRACKET Expr_Loose RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_unique<Expr>(std::move($3));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET Expr_Loose COLON Expr RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_pair(make_unique<Expr>(std::move($3)), make_unique<Expr>(std::move($5)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET Expr_Loose COLON Expr COLON Expr RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move($3)), make_unique<Expr>(std::move($5)), make_unique<Expr>(std::move($7)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+;
+
+CallExpr 
+    : PrimaryExpr LPAREN RPAREN{
+        Expr e;
+        e.type = Expr::Type::CALL;
+        CallExpr ce;
+        ce.callee = make_unique<Expr>(std::move($1));
+        ce.arguments = std::deque<Argument>();
+        e.data = std::move(ce);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LPAREN Arguments RPAREN{
+        Expr e;
+        e.type = Expr::Type::CALL;
+        CallExpr ce;
+        ce.callee = make_unique<Expr>(std::move($1));
+        ce.arguments = std::move($3);
+        e.data = std::move(ce);
+        $$ = std::move(e);
+    }
+;
 Operand
     : IDENTIFIER {
         Expr e;
@@ -457,6 +531,13 @@ BinaryExpr
     }
 ;
 
+IfExpr 
+    : Expr IF Expr ELSE Expr {
+        $$.type = Expr::Type::IF;
+        $$.data = make_tuple(make_unique<Expr>(std::move($1)),make_unique<Expr>(std::move($3)),make_unique<Expr>(std::move($5)));
+    }
+;
+
 ListItems
     : Expr {
         $$.emplace_front(std::move($1));
@@ -599,5 +680,37 @@ Parameter
     | IDENTIFIER ASSIGN Expr {
         $$.type = std::move($3);
         $$.name = std::move($1);
+    }
+;
+
+Arguments
+    : Argument {
+        $$.emplace_front(std::move($1));
+    }
+    | Argument COMMA {
+        $$.emplace_front(std::move($1));
+    }
+    | Argument COMMA Arguments {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+;
+
+Argument
+    : Expr {
+        $$.type = Argument::NORMAL();
+        $$.value = make_unique<Expr>(std::move($1));
+    }
+    | MUL Expr %prec STAR {
+        $$.type = Argument::UNPACK_SEQUENCE();
+        $$.value = make_unique<Expr>(std::move($2));
+    }
+    | POW Expr %prec DOUBLE_STAR {
+        $$.type = Argument::UNPACK_DICT();
+        $$.value = make_unique<Expr>(std::move($2));
+    }
+    | IDENTIFIER ASSIGN Expr {
+        $$.type = $1;
+        $$.value = make_unique<Expr>(std::move($3));
     }
 ;
