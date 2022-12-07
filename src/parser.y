@@ -824,10 +824,10 @@ ForLoopVars_Tuple_NoParen
 ;
 
 Parameters
-    : Parameter {
-        $$.emplace_front(std::move($1));
+    : %empty {
+        
     }
-    | Parameter COMMA {
+    | Parameter {
         $$.emplace_front(std::move($1));
     }
     | Parameter COMMA Parameters {
