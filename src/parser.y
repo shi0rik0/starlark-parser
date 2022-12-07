@@ -171,16 +171,12 @@ IfStatement
         $$.else_branch = std::move($2);
     }
     | IfPart ElifPart {
-        $$.if_elif_branches.emplace_front(std::move($1));
-        for (auto it = $2.rbegin(); it != $2.rend(); ++it) {
-            $$.if_elif_branches.emplace_front(std::move(*it));
-        }
+        $2.emplace_front(std::move($1));
+        $$.if_elif_branches = std::move($2);
     }
     | IfPart ElifPart ElsePart {
-        $$.if_elif_branches.emplace_front(std::move($1));
-        for (auto it = $2.rbegin(); it != $2.rend(); ++it) {
-            $$.if_elif_branches.emplace_front(std::move(*it));
-        }
+        $2.emplace_front(std::move($1));
+        $$.if_elif_branches = std::move($2);
         $$.else_branch = std::move($3);
     }
 ;
