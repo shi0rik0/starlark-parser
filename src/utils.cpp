@@ -207,9 +207,6 @@ string token_to_str(int token, const YYSTYPE& value)
     case yy::parser::token::NOT:
         return sprintfpp("not");
         break;
-    case yy::parser::token::WHILE:
-        return sprintfpp("while");
-        break;
     case yy::parser::token::DEDENT:
         return sprintfpp("dedent");
         break;

@@ -249,7 +249,6 @@ NL \n|\r\n
 <STATE_NOT_LINE_START>"if" { return yy::parser::token::IF; }
 <STATE_NOT_LINE_START>"not" { return yy::parser::token::NOT; }
 <STATE_NOT_LINE_START>not{BLANK}+in { return yy::parser::token::NOT_IN; }
-<STATE_NOT_LINE_START>"while" { return yy::parser::token::WHILE; }
 
 
 <STATE_NOT_LINE_START>{FLOAT} {
