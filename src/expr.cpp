@@ -188,16 +188,16 @@ std::ostream& operator<<(std::ostream& os, const Expr& e)
         os << *p.first << "," << *p.second;
     } break;
     case Expr::Type::IF: {
-        auto& t = get<std::tuple<PExpr, PExpr, PExpr>>(e.data);
-        os << *get<0>(t) << "," << *get<1>(t) << "," << *get<2>(t);
+        auto& t = get<IfExpr>(e.data);
+        os << *t.condition << "," << *t.true_val << "," << *t.false_val;
     } break;
-    case Expr::Type::CALL:{
+    case Expr::Type::CALL: {
         auto& p = get<CallExpr>(e.data);
         os << "CALLEE(" << *p.callee << "),"
            << "ARGS:(";
-        for(auto arg = p.arguments.begin(); arg != p.arguments.end(); ++arg){
+        for (auto arg = p.arguments.begin(); arg != p.arguments.end(); ++arg) {
             os << *arg;
-            if (std::next(arg) != p.arguments.end()){
+            if (std::next(arg) != p.arguments.end()) {
                 os << ",";
             }
         }
@@ -205,21 +205,23 @@ std::ostream& operator<<(std::ostream& os, const Expr& e)
     }
     case Expr::Type::DOT: {
         auto& p = get<DotExpr>(e.data);
-        os << *p.obj << "," << "Attribute(" << p.attr << ")";
+        os << *p.obj << ","
+           << "Attribute(" << p.attr << ")";
         break;
     }
-    case Expr::Type::SLICE:{
+    case Expr::Type::SLICE: {
         auto& p = get<SliceExpr>(e.data);
-        os << *p.sequence << "," << "Slice(" ;
-        if(auto p1 = get_if<PExpr>(&p.slice)){
+        os << *p.sequence << ","
+           << "Slice(";
+        if (auto p1 = get_if<PExpr>(&p.slice)) {
             os << **p1;
         }
-        if(auto p1 = get_if<std::pair<std::optional<PExpr>, std::optional<PExpr>>>(&p.slice)){
+        if (auto p1 = get_if<std::pair<std::optional<PExpr>, std::optional<PExpr>>>(&p.slice)) {
             os << **(p1->first) << ":" << **(p1->second);
         }
-        if(auto p1 = get_if<std::tuple<std::optional<PExpr>, std::optional<PExpr>, std::optional<PExpr>>>(&p.slice)){
-            os << **(std::get<0>(*p1)) << ":" 
-               << **(std::get<1>(*p1)) << ":" 
+        if (auto p1 = get_if<std::tuple<std::optional<PExpr>, std::optional<PExpr>, std::optional<PExpr>>>(&p.slice)) {
+            os << **(std::get<0>(*p1)) << ":"
+               << **(std::get<1>(*p1)) << ":"
                << **(std::get<2>(*p1));
         }
         break;
@@ -268,17 +270,15 @@ std::ostream& operator<<(std::ostream& os, const DictComprehension& e)
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Argument& arg) {
-    if(get_if<Argument::NORMAL>(&arg.type)){
+std::ostream& operator<<(std::ostream& os, const Argument& arg)
+{
+    if (get_if<Argument::NORMAL>(&arg.type)) {
         os << *arg.value;
-    }
-    else if(get_if<Argument::UNPACK_SEQUENCE>(&arg.type)){
+    } else if (get_if<Argument::UNPACK_SEQUENCE>(&arg.type)) {
         os << "UNPACK_SEQUENCE(" << *arg.value << ")";
-    }
-    else if(get_if<Argument::UNPACK_DICT>(&arg.type)){
+    } else if (get_if<Argument::UNPACK_DICT>(&arg.type)) {
         os << "UNPACK_DICT(" << *arg.value << ")";
-    }
-    else if(auto kw = get_if<Identifier>(&arg.type)){
+    } else if (auto kw = get_if<Identifier>(&arg.type)) {
         os << "KEYWORD_ARGS(" << *kw << "=" << *arg.value << ")";
     }
     return os;

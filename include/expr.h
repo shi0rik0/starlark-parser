@@ -75,6 +75,9 @@ struct DictComprehension {
 };
 
 struct IfExpr {
+    PExpr condition;
+    PExpr true_val;
+    PExpr false_val;
 };
 
 struct Expr {
@@ -84,16 +87,15 @@ struct Expr {
         double,
         PExpr,
         std::pair<PExpr, PExpr>,
-        std::tuple<PExpr, PExpr, PExpr>,
         std::deque<Expr>,
         std::deque<std::pair<Expr, Expr>>,
         CallExpr,
         SliceExpr,
         LambdaExpr,
         DotExpr,
+        IfExpr,
         ListComprehension,
-        DictComprehension,
-        IfExpr>
+        DictComprehension>
         Data;
     enum class Type {
         // atomic

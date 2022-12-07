@@ -533,8 +533,12 @@ BinaryExpr
 
 IfExpr 
     : Expr IF Expr ELSE Expr {
+        IfExpr expr;
+        expr.condition = make_unique<Expr>(std::move($3));
+        expr.true_val = make_unique<Expr>(std::move($1));
+        expr.false_val = make_unique<Expr>(std::move($5));
         $$.type = Expr::Type::IF;
-        $$.data = make_tuple(make_unique<Expr>(std::move($1)),make_unique<Expr>(std::move($3)),make_unique<Expr>(std::move($5)));
+        $$.data = std::move(expr);
     }
 ;
 
