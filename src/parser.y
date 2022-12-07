@@ -4,7 +4,7 @@
 
 %code requires {
     // This part will be copied to the beginning of parser.h
-    #include "types.h"
+    #include "statements.h"
     #include <deque>
 }
 

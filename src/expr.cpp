@@ -148,10 +148,10 @@ std::ostream& operator<<(std::ostream& os, const Expr& e)
         os << get<double>(e.data);
         break;
     case Expr::Type::LIST:
-        os << get<std::deque<Expr>>(e.data);
+        print_exprs(os, get<std::deque<Expr>>(e.data));
         break;
     case Expr::Type::TUPLE:
-        os << get<std::deque<Expr>>(e.data);
+        print_exprs(os, get<std::deque<Expr>>(e.data));
         break;
     case Expr::Type::DICT:
         print_dict(os, get<Expr::Dict>(e.data));
@@ -292,5 +292,15 @@ void print_dict(std::ostream& os, const Expr::Dict& d)
     for (const pair<Expr, Expr>& i : d) {
         os << sep << i.first << ":" << i.second;
         sep = SEP_1;
+    }
+}
+
+void print_exprs(std::ostream& os, const std::deque<Expr>& l)
+{
+    for (auto it = l.begin(); it != l.end(); ++it) {
+        os << *it;
+        if (std::next(it) != l.end()) {
+            os << ",";
+        }
     }
 }

@@ -1,6 +1,6 @@
 #include "utils.h"
 #include "parser.h"
-#include "types.h"
+#include "statements.h"
 #include <cstdarg>
 #include <iostream>
 
@@ -214,17 +214,6 @@ string token_to_str(int token, const YYSTYPE& value)
         fatal_error("error: unknown token");
         break;
     }
-}
-
-std::ostream& operator<<(std::ostream& os, const std::deque<Expr>& l)
-{
-    for (auto it = l.begin(); it != l.end(); ++it) {
-        os << *it;
-        if (std::next(it) != l.end()) {
-            os << ",";
-        }
-    }
-    return os;
 }
 
 void fatal_error(const std::string& error_msg)

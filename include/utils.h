@@ -11,7 +11,7 @@ std::string token_to_str(int token, const YYSTYPE& value);
 // the type of @format cannot be std::string
 std::string sprintfpp(const char* format, ...);
 
-std::ostream& operator<<(std::ostream& os, const std::deque<Expr>& l);
+
 
 // @msg can be std::string or const char*
 #define FATAL_ERROR(msg)                                                      \

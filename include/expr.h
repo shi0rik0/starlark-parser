@@ -172,5 +172,6 @@ std::ostream& operator<<(std::ostream& os, const DictComprehension& e);
 std::ostream& operator<<(std::ostream& os, const Argument& arg);
 
 void print_dict(std::ostream& os, const Expr::Dict& d);
+void print_exprs(std::ostream& os, const std::deque<Expr>& l);
 
 #endif

@@ -30,7 +30,7 @@ flex_target(LEXER "${SRC_DIR}/lexer.l" "${LEXER_OUT}" DEFINES_FILE "${PARSER_DIR
 bison_target(PARSER "${SRC_DIR}/parser.y" "${PARSER_OUT}" DEFINES_FILE "${PARSER_DIR}/parser.h")
 add_flex_bison_dependency(LEXER PARSER)
 
-set(SRCS "src/types.cpp" "src/utils.cpp" "src/expr.cpp" "${LEXER_OUT}" "${PARSER_OUT}")
+set(SRCS "src/statements.cpp" "src/utils.cpp" "src/expr.cpp" "${LEXER_OUT}" "${PARSER_OUT}")
 set(INCLUDES "${PARSER_DIR}" "include")
 
 add_executable(parser "src/main_parser.cpp" ${SRCS})
