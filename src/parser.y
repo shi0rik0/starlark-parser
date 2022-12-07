@@ -64,11 +64,12 @@
 
 // Keywords
 // "not" is a unary op, and "and", "or", "in" and "not in" are binary ops.
-%token <NoneType> AND ELIF IN OR BREAK ELSE LAMBDA PASS CONTINUE FOR LOAD RETURN DEF IF NOT WHILE NOT_IN
+%token <NoneType> AND ELIF IN OR BREAK ELSE LAMBDA PASS CONTINUE FOR LOAD RETURN DEF IF NOT NOT_IN
 
 // Precedence and associativity
 // ref: https://docs.python.org/3/reference/expressions.html#operator-precedence
 %left STAR DOUBLE_STAR
+%left LAMBDA
 %left IF ELSE
 %left ASSIGN
 %left OR
@@ -82,7 +83,7 @@
 %left ADD SUB
 %left MUL DIV FLOORDIV MOD
 %left POS NEG INVERT
-%right POW // TODO: POW seems to be more complicated. See https://docs.python.org/3/reference/expressions.html#the-power-operator
+%right POW
 
 %type <Statements> Start Statements CompoundStatement
 %type <Statement> BlockStatement SmallStatement
@@ -96,7 +97,7 @@
 %type <LoadStatement> LoadStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr DotExpr SliceExpr CallExpr
 %type <Expr> Expr_Loose
-%type <Expr> Operand List Dict Tuple Tuple_NoParen ListComp DictComp
+%type <Expr> Operand List Dict Tuple Tuple_NoParen
 %type <std::deque<Expr>> ListItems
 %type <std::deque<Expr>> TupleItems
 %type <std::deque<std::pair<Expr, Expr>>> DictItems
@@ -109,6 +110,10 @@
 %type <Argument> Argument
 %type <std::deque<LoadStatement::Symbol>> Symbols
 %type <LoadStatement::Symbol> Symbol
+%type <std::deque<ComprehensionClause>> CompClauses
+%type <ComprehensionClause> CompClause
+%type <ForClause> ForClause
+%type <IfClause> IfClause
 
 %start Start
 
@@ -325,6 +330,9 @@ Expr
     | IfExpr {
         $$ = std::move($1);
     }
+    | LambdaExpr {
+        $$ = std::move($1);
+    }
 ;
 
 Expr_Loose
@@ -417,6 +425,16 @@ CallExpr
     }
 ;
 
+LambdaExpr
+    : LAMBDA Parameters COLON Expr %prec LAMBDA {
+        LambdaExpr e;
+        e.parameters = std::move($2);
+        e.return_val = make_unique<Expr>(std::move($4));
+        $$.type = Expr::Type::LAMBDA;
+        $$.data = std::move(e);
+    }
+;
+
 Operand
     : IDENTIFIER {
         Expr e;
@@ -456,6 +474,54 @@ Operand
     }
     | Dict {
         $$ = std::move($1);
+    }
+    | LBRACKET Expr ForClause CompClauses RBRACKET {
+        ListComprehension c;
+        c.item = make_unique<Expr>(std::move($2));
+        $4.emplace_front(std::move($3));
+        c.clauses = std::move($4);
+        $$.type = Expr::Type::LIST_COMPREHENSION;
+        $$.data = std::move(c);
+    }
+    | LBRACKET Expr COLON Expr ForClause CompClauses RBRACKET {
+        DictComprehension c;
+        c.item = make_pair(make_unique<Expr>(std::move($2)), make_unique<Expr>(std::move($4)));
+        $6.emplace_front(std::move($5));
+        c.clauses = std::move($6);
+        $$.type = Expr::Type::DICT_COMPREHENSION;
+        $$.data = std::move(c);
+    }
+;
+
+CompClauses
+    : %empty {
+
+    }
+    | CompClause CompClauses {
+        $2.emplace_front(std::move($1));
+        $$ = std::move($2);
+    }
+;
+
+CompClause
+    : IfClause {
+        $$ = std::move($1);
+    }
+    | ForClause {
+        $$ = std::move($1);
+    }
+;
+
+IfClause
+    : IF Expr {
+        $$.condition = make_unique<Expr>(std::move($2));
+    }
+;
+
+ForClause
+    : FOR ForLoopVars IN Expr {
+        $$.for_what = make_unique<Expr>(std::move($2));
+        $$.in_what = make_unique<Expr>(std::move($4));
     }
 ;
 

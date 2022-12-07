@@ -10,6 +10,8 @@
 #include <variant>
 #include <vector>
 
+struct Parameter;
+
 struct Expr;
 
 typedef std::unique_ptr<Expr> PExpr;
@@ -44,7 +46,7 @@ struct SliceExpr {
 };
 
 struct LambdaExpr {
-    std::deque<Identifier> parameters;
+    std::deque<Parameter> parameters;
     PExpr return_val;
 };
 

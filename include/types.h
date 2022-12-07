@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include "expr.h"
+#include <deque>
 #include <iostream>
 #include <optional>
 #include <ostream>
