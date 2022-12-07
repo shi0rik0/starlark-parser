@@ -42,7 +42,7 @@ STRING \"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\
 BYTES b\"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
 COMMENT #[^\n]*\n
 /* supports both Unix and Windows style new line */
-NL \n|\r\n 
+NEW_LINE \n|\r\n 
 
 %x STATE_LINE_START
 %x STATE_NOT_LINE_START
@@ -80,7 +80,7 @@ NL \n|\r\n
 }
 
 
-<STATE_NOT_LINE_START>{NL} {
+<STATE_NOT_LINE_START>{NEW_LINE} {
     // ignore new line if in braces
     if (braces.empty()) {
         BEGIN(STATE_LINE_START);
@@ -115,7 +115,7 @@ NL \n|\r\n
 
 
     /* empty line */
-<STATE_LINE_START>{BLANK}*{COMMENT}?{NL}? {
+<STATE_LINE_START>{BLANK}*{COMMENT}?{NEW_LINE}? {
 }
 
 <STATE_DEDENT><<EOF>> {
