@@ -23,6 +23,8 @@ std::ostream& operator<<(std::ostream& os, const Statement& s)
         os << "ForStatement(" << *p << ")";
     } else if (auto p = get_if<DefStatement>(&s.data)) {
         os << "DefStatement(" << *p << ")";
+    } else if (auto p = get_if<LoadStatement>(&s.data)) {
+        os << "LoadStatement(" << *p << ")";
     } else {
         FATAL_ERROR("TODO");
     }
@@ -78,5 +80,18 @@ std::ostream& operator<<(std::ostream& os, const ForStatement& s)
 std::ostream& operator<<(std::ostream& os, const DefStatement& s)
 {
     os << "TODO";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const LoadStatement& s)
+{
+    os << s.file;
+    for (const LoadStatement::Symbol& i : s.symbols) {
+        os << ",";
+        if (i.alias.has_value()) {
+            os << i.alias.value() << "=";
+        }
+        os << i.name;
+    }
     return os;
 }

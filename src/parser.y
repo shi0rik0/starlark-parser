@@ -92,6 +92,7 @@
 %type <Statements> BlockBody
 %type <DefStatement> DefStatement
 %type <ForStatement> ForStatement
+%type <LoadStatement> LoadStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr DotExpr SliceExpr CallExpr
 %type <Expr> Expr_Loose
 %type <Expr> Operand List Dict Tuple Tuple_NoParen ListComp DictComp
@@ -105,6 +106,8 @@
 %type <Parameter> Parameter
 %type <std::deque<Argument>> Arguments
 %type <Argument> Argument
+%type <std::deque<LoadStatement::Symbol>> Symbols
+%type <LoadStatement::Symbol> Symbol
 
 %start Start
 
@@ -259,19 +262,52 @@ SmallStatement
         $$ = std::move(s);
     }
     | BREAK {
-        Statement s;
-        s.data = BreakStatement();
-        $$ = std::move(s);
+        $$.data = BreakStatement();
     }
     | CONTINUE {
-        Statement s;
-        s.data = ContinueStatement();
-        $$ = std::move(s);
+        $$.data = ContinueStatement();
     }
     | PASS {
-        Statement s;
-        s.data = PassStatement();
-        $$ = std::move(s);
+        $$.data = PassStatement();
+    }
+    | LoadStatement {
+        $$.data = std::move($1);
+    }
+;
+
+LoadStatement
+    : LOAD LPAREN STRING RPAREN {
+        $$.file = std::move($3);
+    }
+    | LOAD LPAREN STRING COMMA RPAREN {
+        $$.file = std::move($3);
+    }
+    | LOAD LPAREN STRING COMMA Symbols RPAREN {
+        $$.file = std::move($3);
+        $$.symbols = std::move($5);
+    }
+;
+
+Symbols
+    : Symbol {
+        $$.emplace_front(std::move($1));
+    }
+    | Symbol COMMA {
+        $$.emplace_front(std::move($1));
+    }
+    | Symbol COMMA Symbols {
+        $3.emplace_front(std::move($1));
+        $$ = std::move($3);
+    }
+;
+
+Symbol
+    : STRING {
+        $$.name = std::move($1);
+    }
+    | IDENTIFIER ASSIGN STRING {
+        $$.name = std::move($3);
+        $$.alias = std::move($1);
     }
 ;
 

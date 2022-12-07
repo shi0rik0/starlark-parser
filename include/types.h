@@ -36,7 +36,12 @@ struct PassStatement {
 };
 
 struct LoadStatement {
-    // TODO
+    std::string file;
+    struct Symbol {
+        Identifier name;
+        std::optional<Identifier> alias;
+    };
+    std::deque<Symbol> symbols;
 };
 
 struct AssignStatement {
@@ -99,5 +104,6 @@ std::ostream& operator<<(std::ostream& os, const IfStatement& s);
 std::ostream& operator<<(std::ostream& os, const AssignStatement& s);
 std::ostream& operator<<(std::ostream& os, const ForStatement& s);
 std::ostream& operator<<(std::ostream& os, const DefStatement& s);
+std::ostream& operator<<(std::ostream& os, const LoadStatement& s);
 
 #endif
