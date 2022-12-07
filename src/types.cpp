@@ -46,7 +46,49 @@ std::ostream& operator<<(std::ostream& os, const ReturnStatement& s)
 
 std::ostream& operator<<(std::ostream& os, const AssignStatement& s)
 {
-    os << s.leftval << " = " << s.rightval;
+    os << s.left_val;
+    switch (s.type) {
+    case AssignStatement::Type::ASSIGN:
+        os << "=";
+        break;
+    case AssignStatement::Type::ADD:
+        os << "+=";
+        break;
+    case AssignStatement::Type::SUB:
+        os << "-=";
+        break;
+    case AssignStatement::Type::MUL:
+        os << "*=";
+        break;
+    case AssignStatement::Type::DIV:
+        os << "/=";
+        break;
+    case AssignStatement::Type::FLOORDIV:
+        os << "//=";
+        break;
+    case AssignStatement::Type::MOD:
+        os << "%=";
+        break;
+    case AssignStatement::Type::POW:
+        os << "**=";
+        break;
+    case AssignStatement::Type::RSHIFT:
+        os << ">>=";
+        break;
+    case AssignStatement::Type::LSHIFT:
+        os << "<<=";
+        break;
+    case AssignStatement::Type::BITAND:
+        os << "&=";
+        break;
+    case AssignStatement::Type::BITOR:
+        os << "|=";
+        break;
+    case AssignStatement::Type::XOR:
+        os << "^=";
+        break;
+    }
+    os << s.right_val;
     return os;
 }
 

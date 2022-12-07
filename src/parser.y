@@ -95,6 +95,7 @@
 %type <DefStatement> DefStatement
 %type <ForStatement> ForStatement
 %type <LoadStatement> LoadStatement
+%type <AssignStatement> AssignStatement
 %type <Expr> Expr IfExpr PrimaryExpr UnaryExpr BinaryExpr LambdaExpr DotExpr SliceExpr CallExpr
 %type <Expr> Expr_Loose
 %type <Expr> Operand List Dict Tuple Tuple_NoParen
@@ -259,13 +260,8 @@ SmallStatement
         s.data = std::move(rs);
         $$ = std::move(s);
     }
-    | Expr_Loose ASSIGN Expr_Loose {
-        AssignStatement asgn;
-        asgn.leftval = std::move($1);
-        asgn.rightval = std::move($3);
-        Statement s;
-        s.data = std::move(asgn);
-        $$ = std::move(s);
+    | AssignStatement {
+        $$.data = std::move($1);
     }
     | BREAK {
         $$.data = BreakStatement();
@@ -278,6 +274,74 @@ SmallStatement
     }
     | LoadStatement {
         $$.data = std::move($1);
+    }
+;
+
+AssignStatement
+    : Expr_Loose ASSIGN Expr_Loose {
+        $$.type = AssignStatement::Type::ASSIGN;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IADD Expr_Loose {
+        $$.type = AssignStatement::Type::ADD;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose ISUB Expr_Loose {
+        $$.type = AssignStatement::Type::SUB;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IMUL Expr_Loose {
+        $$.type = AssignStatement::Type::MUL;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IDIV Expr_Loose {
+        $$.type = AssignStatement::Type::DIV;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IFLOORDIV Expr_Loose {
+        $$.type = AssignStatement::Type::FLOORDIV;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IMOD Expr_Loose {
+        $$.type = AssignStatement::Type::MOD;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IPOW Expr_Loose {
+        $$.type = AssignStatement::Type::POW;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IRSHIFT Expr_Loose {
+        $$.type = AssignStatement::Type::RSHIFT;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose ILSHIFT Expr_Loose {
+        $$.type = AssignStatement::Type::LSHIFT;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IBITAND Expr_Loose {
+        $$.type = AssignStatement::Type::BITAND;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IBITOR Expr_Loose {
+        $$.type = AssignStatement::Type::BITOR;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
+    }
+    | Expr_Loose IXOR Expr_Loose {
+        $$.type = AssignStatement::Type::XOR;
+        $$.left_val = std::move($1);
+        $$.right_val = std::move($3);
     }
 ;
 

@@ -44,10 +44,25 @@ struct LoadStatement {
     };
     std::deque<Symbol> symbols;
 };
-
 struct AssignStatement {
-    Expr leftval;
-    Expr rightval;
+    enum class Type {
+        ASSIGN,
+        ADD,
+        SUB,
+        MUL,
+        DIV,
+        FLOORDIV,
+        MOD,
+        POW,
+        RSHIFT,
+        LSHIFT,
+        BITAND,
+        BITOR,
+        XOR
+    };
+    Type type;
+    Expr left_val;
+    Expr right_val;
 };
 
 struct IfStatement {
