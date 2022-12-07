@@ -213,6 +213,7 @@ ForStatement
 
 DefStatement
     : DEF IDENTIFIER LPAREN Parameters RPAREN COLON BlockBody {
+        $$.name = std::move($2);
         $$.parameters = std::move($4);
         $$.body = std::move($7);
     }

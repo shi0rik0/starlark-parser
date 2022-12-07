@@ -90,6 +90,7 @@ struct Parameter {
 };
 
 struct DefStatement {
+    Identifier name;
     std::deque<Parameter> parameters;
     Statements body;
 };
