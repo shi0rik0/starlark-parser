@@ -4,12 +4,12 @@ ifeq ($(RELEASE),0)
 # debug
 CMAKE_BUILD_TYPE := Debug
 else
-	ifeq ($(RELEASE),1)
+ifeq ($(RELEASE),1)
 # release
 CMAKE_BUILD_TYPE := Release
-	else
+else
 $(error RELEASE should be 0 or 1)
-	endif
+endif
 endif
 
 .PHONY: all
