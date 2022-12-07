@@ -69,6 +69,7 @@
 // Precedence and associativity
 // ref: https://docs.python.org/3/reference/expressions.html#operator-precedence
 %left STAR DOUBLE_STAR
+%left IF ELSE
 %left ASSIGN
 %left OR
 %left AND
@@ -312,10 +313,7 @@ Symbol
 ;
 
 Expr
-    : LPAREN Expr RPAREN {
-        $$ = (std::move($2));
-    } 
-    | PrimaryExpr {
+    : PrimaryExpr {
         $$ = std::move($1);
     }
     | UnaryExpr {
@@ -351,6 +349,9 @@ PrimaryExpr
     | CallExpr {
         $$ = std::move($1);
     }
+    | LPAREN Expr RPAREN {
+        $$ = (std::move($2));
+    } 
 ;
 
 DotExpr
@@ -415,6 +416,7 @@ CallExpr
         $$ = std::move(e);
     }
 ;
+
 Operand
     : IDENTIFIER {
         Expr e;
