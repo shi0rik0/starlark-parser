@@ -186,87 +186,96 @@ std::ostream& operator<<(std::ostream& os, const Expr& e)
     case Expr::Type::NOT_IN: {
         auto& p = get<std::pair<PExpr, PExpr>>(e.data);
         os << *p.first << "," << *p.second;
-    } break;
-    case Expr::Type::IF: {
-        auto& t = get<IfExpr>(e.data);
-        os << *t.condition << "," << *t.true_val << "," << *t.false_val;
-    } break;
-    case Expr::Type::CALL: {
-        auto& p = get<CallExpr>(e.data);
-        os << "CALLEE(" << *p.callee << "),"
-           << "ARGS:(";
-        for (auto arg = p.arguments.begin(); arg != p.arguments.end(); ++arg) {
-            os << *arg;
-            if (std::next(arg) != p.arguments.end()) {
-                os << ",";
-            }
-        }
         break;
     }
-    case Expr::Type::DOT: {
-        auto& p = get<DotExpr>(e.data);
-        os << *p.obj << ","
-           << "Attribute(" << p.attr << ")";
+    case Expr::Type::IF:
+        os << get<IfExpr>(e.data);
         break;
-    }
-    case Expr::Type::SLICE: {
-        auto& p = get<SliceExpr>(e.data);
-        os << *p.sequence << ","
-           << "Slice(";
-        if (auto p1 = get_if<PExpr>(&p.slice)) {
-            os << **p1;
-        }
-        if (auto p1 = get_if<std::pair<std::optional<PExpr>, std::optional<PExpr>>>(&p.slice)) {
-            os << **(p1->first) << ":" << **(p1->second);
-        }
-        if (auto p1 = get_if<std::tuple<std::optional<PExpr>, std::optional<PExpr>, std::optional<PExpr>>>(&p.slice)) {
-            os << **(std::get<0>(*p1)) << ":"
-               << **(std::get<1>(*p1)) << ":"
-               << **(std::get<2>(*p1));
-        }
+    case Expr::Type::CALL:
+        os << get<CallExpr>(e.data);
         break;
-    }
+    case Expr::Type::DOT:
+        os << get<DotExpr>(e.data);
+        break;
+    case Expr::Type::SLICE:
+        os << get<SliceExpr>(e.data);
+        break;
     case Expr::Type::LIST_COMPREHENSION:
-        FATAL_ERROR(string("TODO"));
+        os << get<ListComprehension>(e.data);
         break;
     case Expr::Type::DICT_COMPREHENSION:
-        FATAL_ERROR(string("TODO"));
+        os << get<DictComprehension>(e.data);
         break;
     case Expr::Type::LAMBDA:
-        FATAL_ERROR(string("TODO"));
+        os << get<LambdaExpr>(e.data);
         break;
     }
     os << ")";
     return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const IfExpr& e)
+{
+    os << *e.condition << "," << *e.true_val << "," << *e.false_val;
+    return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const CallExpr& e)
 {
-    FATAL_ERROR(string("TODO"));
+    os << *e.callee;
+    for (auto arg = e.arguments.begin(); arg != e.arguments.end(); ++arg) {
+        os << "," << *arg;
+    }
     return os;
 }
 std::ostream& operator<<(std::ostream& os, const SliceExpr& e)
 {
-    FATAL_ERROR(string("TODO"));
-    return os;
-}
-std::ostream& operator<<(std::ostream& os, const LambdaExpr& e)
-{
-    FATAL_ERROR(string("TODO"));
+    os << *e.sequence << ","
+       << "Slice(";
+    if (auto p1 = get_if<PExpr>(&e.slice)) {
+        os << **p1;
+    }
+    if (auto p1 = get_if<std::pair<std::optional<PExpr>, std::optional<PExpr>>>(&e.slice)) {
+        os << **(p1->first) << ":" << **(p1->second);
+    }
+    if (auto p1 = get_if<std::tuple<std::optional<PExpr>, std::optional<PExpr>, std::optional<PExpr>>>(&e.slice)) {
+        os << **(std::get<0>(*p1)) << ":"
+           << **(std::get<1>(*p1)) << ":"
+           << **(std::get<2>(*p1));
+    }
     return os;
 }
 std::ostream& operator<<(std::ostream& os, const DotExpr& e)
 {
-    FATAL_ERROR(string("TODO"));
+    os << *e.obj << "," << e.attr;
+    return os;
+}
+std::ostream& operator<<(std::ostream& os, const LambdaExpr& e)
+{
+    static const char SEP_0[] = "";
+    static const char SEP_1[] = ",";
+    const char* sep = SEP_0;
+    for (const Parameter& i : e.parameters) {
+        os << sep << i;
+        sep = SEP_1;
+    }
+    os << "," << *e.return_val;
     return os;
 }
 std::ostream& operator<<(std::ostream& os, const ListComprehension& e)
 {
-    FATAL_ERROR(string("TODO"));
+    os << *e.item;
+    for (const ComprehensionClause& i : e.clauses) {
+        os << "," << i;
+    }
     return os;
 }
 std::ostream& operator<<(std::ostream& os, const DictComprehension& e)
 {
-    FATAL_ERROR(string("TODO"));
+    os << *e.item.first << ":" << *e.item.second;
+    for (const ComprehensionClause& i : e.clauses) {
+        os << "," << i;
+    }
     return os;
 }
 
@@ -275,11 +284,11 @@ std::ostream& operator<<(std::ostream& os, const Argument& arg)
     if (get_if<Argument::NORMAL>(&arg.type)) {
         os << *arg.value;
     } else if (get_if<Argument::UNPACK_SEQUENCE>(&arg.type)) {
-        os << "UNPACK_SEQUENCE(" << *arg.value << ")";
+        os << "*" << *arg.value;
     } else if (get_if<Argument::UNPACK_DICT>(&arg.type)) {
-        os << "UNPACK_DICT(" << *arg.value << ")";
+        os << "**" << *arg.value;
     } else if (auto kw = get_if<Identifier>(&arg.type)) {
-        os << "KEYWORD_ARGS(" << *kw << "=" << *arg.value << ")";
+        os << *kw << "=" << *arg.value;
     }
     return os;
 }
@@ -303,4 +312,14 @@ void print_exprs(std::ostream& os, const std::deque<Expr>& l)
             os << ",";
         }
     }
+}
+
+std::ostream& operator<<(std::ostream& os, const ComprehensionClause& c)
+{
+    if (auto p = get_if<ForClause>(&c)) {
+        os << "FOR(" << *p->for_what << "," << *p->in_what << ")";
+    } else if (auto p = get_if<IfClause>(&c)) {
+        os << "IF(" << *p->condition << ")";
+    }
+    return os;
 }

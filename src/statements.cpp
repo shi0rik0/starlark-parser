@@ -1,5 +1,6 @@
 #include "statements.h"
 #include "utils.h"
+#include <variant>
 
 using namespace std;
 
@@ -134,6 +135,20 @@ std::ostream& operator<<(std::ostream& os, const LoadStatement& s)
             os << i.alias.value() << "=";
         }
         os << i.name;
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Parameter& p)
+{
+    if (holds_alternative<Parameter::NORMAL>(p.type)) {
+        os << p.name;
+    } else if (holds_alternative<Parameter::ARGS>(p.type)) {
+        os << "*" << p.name;
+    } else if (holds_alternative<Parameter::KWARGS>(p.type)) {
+        os << "**" << p.name;
+    } else if (auto e = get_if<Expr>(&p.type)) {
+        os << p.name << "=" << *e;
     }
     return os;
 }

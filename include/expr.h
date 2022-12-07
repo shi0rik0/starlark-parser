@@ -163,6 +163,7 @@ struct Expr {
 
 std::ostream& operator<<(std::ostream& os, Expr::Type t);
 std::ostream& operator<<(std::ostream& os, const Expr& e);
+std::ostream& operator<<(std::ostream& os, const IfExpr& e);
 std::ostream& operator<<(std::ostream& os, const CallExpr& e);
 std::ostream& operator<<(std::ostream& os, const SliceExpr& e);
 std::ostream& operator<<(std::ostream& os, const LambdaExpr& e);
@@ -170,6 +171,7 @@ std::ostream& operator<<(std::ostream& os, const DotExpr& e);
 std::ostream& operator<<(std::ostream& os, const ListComprehension& e);
 std::ostream& operator<<(std::ostream& os, const DictComprehension& e);
 std::ostream& operator<<(std::ostream& os, const Argument& arg);
+std::ostream& operator<<(std::ostream& os, const ComprehensionClause& c);
 
 void print_dict(std::ostream& os, const Expr::Dict& d);
 void print_exprs(std::ostream& os, const std::deque<Expr>& l);

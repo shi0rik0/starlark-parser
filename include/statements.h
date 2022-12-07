@@ -121,5 +121,6 @@ std::ostream& operator<<(std::ostream& os, const AssignStatement& s);
 std::ostream& operator<<(std::ostream& os, const ForStatement& s);
 std::ostream& operator<<(std::ostream& os, const DefStatement& s);
 std::ostream& operator<<(std::ostream& os, const LoadStatement& s);
+std::ostream& operator<<(std::ostream& os, const Parameter& s);
 
 #endif
