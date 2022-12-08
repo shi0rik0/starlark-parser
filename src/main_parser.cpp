@@ -13,7 +13,7 @@ int main(void)
     parser.parse();
 
     for (const Statement& i : v) {
-        cout << i << endl;
+        cout << i;
     }
 
     return 0;

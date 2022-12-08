@@ -114,9 +114,6 @@ struct Statement {
 std::ostream& operator<<(std::ostream& os, const Statement& s);
 std::ostream& operator<<(std::ostream& os, const ExprStatement& s);
 std::ostream& operator<<(std::ostream& os, const ReturnStatement& s);
-std::ostream& operator<<(std::ostream& os, const BreakStatement& s);
-std::ostream& operator<<(std::ostream& os, const ContinueStatement& s);
-std::ostream& operator<<(std::ostream& os, const PassStatement& s);
 std::ostream& operator<<(std::ostream& os, const IfStatement& s);
 std::ostream& operator<<(std::ostream& os, const AssignStatement& s);
 std::ostream& operator<<(std::ostream& os, const ForStatement& s);

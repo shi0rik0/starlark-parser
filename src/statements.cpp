@@ -1,32 +1,45 @@
 #include "statements.h"
 #include "utils.h"
 #include <deque>
+#include <ostream>
 #include <variant>
 
 using namespace std;
 
+namespace {
+int indent_level = 0;
+}
+
+void print_indent(std::ostream& os)
+{
+    for (int i = 0; i < indent_level * 4; ++i) {
+        os << ' ';
+    }
+}
+
 std::ostream& operator<<(std::ostream& os, const Statement& s)
 {
+    print_indent(os);
     if (auto p = get_if<ExprStatement>(&s.data)) {
-        os << "Expr[" << *p << "]";
+        os << "[Expr] " << *p << endl;
     } else if (auto p = get_if<ReturnStatement>(&s.data)) {
-        os << "Return[" << *p << "]";
+        os << "[Return] " << *p << endl;
     } else if (auto p = get_if<BreakStatement>(&s.data)) {
-        os << "Break[" << *p << "]";
+        os << "[Break] " << endl;
     } else if (auto p = get_if<ContinueStatement>(&s.data)) {
-        os << "Continue[" << *p << "]";
+        os << "[Continue] " << endl;
     } else if (auto p = get_if<PassStatement>(&s.data)) {
-        os << "Pass[" << *p << "]";
+        os << "[Pass] " << endl;
     } else if (auto p = get_if<IfStatement>(&s.data)) {
-        os << "If[" << *p << "]";
+        os << "[If] " << *p;
     } else if (auto p = get_if<AssignStatement>(&s.data)) {
-        os << "Assign[" << *p << "]";
+        os << "[Assign] " << *p << endl;
     } else if (auto p = get_if<ForStatement>(&s.data)) {
-        os << "For[" << *p << "]";
+        os << "[For] " << *p;
     } else if (auto p = get_if<DefStatement>(&s.data)) {
-        os << "Def[" << *p << "]";
+        os << "[Def] " << *p;
     } else if (auto p = get_if<LoadStatement>(&s.data)) {
-        os << "Load[" << *p << "]";
+        os << "[Load] " << *p << endl;
     }
     return os;
 }
@@ -91,48 +104,45 @@ std::ostream& operator<<(std::ostream& os, const AssignStatement& s)
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const BreakStatement& s)
-{
-    return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const ContinueStatement& s)
-{
-    return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const PassStatement& s)
-{
-    return os;
-}
-
 std::ostream& operator<<(std::ostream& os, const IfStatement& s)
 {
+    os << endl;
     for (const auto& i : s.if_elif_branches) {
-        os << i.first << "->{";
+        print_indent(os);
+        os << i.first << "->{\n";
+        ++indent_level;
         for (const auto& j : i.second) {
-            os << j << ";";
+            os << j;
         }
-        os << "}";
+        --indent_level;
+        print_indent(os);
+        os << "}\n";
     }
     if (s.else_branch.has_value()) {
         auto& value = s.else_branch.value();
-        os << "Otherwise->{";
+        print_indent(os);
+        os << "Otherwise->{\n";
+        ++indent_level;
         for (const auto& j : value) {
-            os << j << ";";
+            os << j;
         }
-        os << "}";
+        --indent_level;
+        print_indent(os);
+        os << "}\n";
     }
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const ForStatement& s)
 {
-    os << s.for_what << "=" << s.in_what << "{";
+    os << s.for_what << "=" << s.in_what << "{\n";
+    ++indent_level;
     for (const auto& i : s.body) {
-        os << i << ";";
+        os << i;
     }
-    os << "}";
+    --indent_level;
+    print_indent(os);
+    os << "}\n";
     return os;
 }
 
@@ -140,11 +150,14 @@ std::ostream& operator<<(std::ostream& os, const DefStatement& s)
 {
     os << s.name << "(";
     print_sequence(s.parameters, os, ",");
-    os << ")->{";
+    os << ")->{\n";
+    ++indent_level;
     for (const auto& i : s.body) {
-        os << i << ";";
+        os << i;
     }
-    os << "}";
+    --indent_level;
+    print_indent(os);
+    os << "}\n";
     return os;
 }
 
