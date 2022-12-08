@@ -207,8 +207,6 @@ NEW_LINE \n|\r\n
 <STATE_NOT_LINE_START>"==" { return yy::parser::token::EQ; }
 <STATE_NOT_LINE_START>"!=" { return yy::parser::token::NE; }
 
-<STATE_NOT_LINE_START>"+" { return yy::parser::token::POS; }
-<STATE_NOT_LINE_START>"-" { return yy::parser::token::NEG; }
 <STATE_NOT_LINE_START>"~" { return yy::parser::token::INVERT; }
 
 <STATE_NOT_LINE_START>"." { return yy::parser::token::DOT; }
