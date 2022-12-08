@@ -1,8 +1,15 @@
-## Sample parser (Flex + Bison)
+## Introduction
 
-A port of the [CUP calculator example](http://www2.cs.tum.edu/projects/cup/examples.php)
-to the [Flex](https://jflex.de) and [Bison](https://www.gnu.org/software/bison/) generators,
-built via [CMake](https://cmake.org).
+This is a simple parser of Starlark implemented with flex and bison.
 
-Example project for the **Formal Languages and Compilers** course
-(M.D. in Computer Science Engineering) at the [Polytechnic University of Bari](http://www.poliba.it).
+## Building Requirements
+
+You should make sure that these commands are available in your environment: `make`, `cmake`, `flex`, `bison` and `g++`.
+
+## How to Build and Execute
+
+First run `make clean && make test`. If you see a message saying all tests are passed, the building is successful. The compiled program is `build/parser`. You can also run the parser by executing `make run-parser`.
+
+## Known Issues
+
+This parser can't handle non-ASCII characters properly.
