@@ -22,7 +22,7 @@ string token_to_str(int token, const YYSTYPE& value)
         return sprintfpp("string(%s)", value.as<string>().c_str());
         break;
     case yy::parser::token::BYTES:
-        return sprintfpp("bytes");
+        return sprintfpp("bytes(%s)", value.as<string>().c_str());
         break;
     case yy::parser::token::NEW_LINE:
         return sprintfpp("new_line");

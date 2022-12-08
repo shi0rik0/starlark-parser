@@ -35,11 +35,29 @@
 
 BLANK [ \t]
 IDENTIFIER [_a-zA-Z][_a-zA-Z0-9]*
-INT [0-9]+
-FLOAT (([0-9]*\.[0-9]*)(e-?[0-9]+)?)|([0-9]+(e-?[0-9]+))
-/* ord('[')==91 ord('\')==92 ord(']')==93*/
-STRING \"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
-BYTES b\"([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\"|'([ -\x5b\x5d-~]|\\a|\\b|\\f|\\n|\\r|\\t|\\v)*\'
+
+INT {DEC_INT}|{OCT_INT}|{HEX_INT}|0
+DEC_INT [1-9][0-9]*
+OCT_INT 0[oO][0-7]+
+HEX_INT 0[xX][0-9a-fA-F]+
+
+FLOAT [0-9]+\.[0-9]*{EXPONENT}?|[0-9]+{EXPONENT}|\.[0-9]+{EXPONENT}?
+EXPONENT [eE][+-]?[0-9]+
+
+
+STRING {SINGLE_QUOTE_STR}|{DOUBLE_QUOTE_STR}|{MULTILINE_SINGLE_QUOTE_STR}|{MULTILINE_DOUBLE_QUOTE_STR}|{RAW_SINGLE_QUOTE_STR}|{RAW_DOUBLE_QUOTE_STR}|{RAW_MULTILINE_SINGLE_QUOTE_STR}|{RAW_MULTILINE_DOUBLE_QUOTE_STR}
+SINGLE_QUOTE_STR '([^'\\\n]|\\'|{ESCAPES})*'
+DOUBLE_QUOTE_STR \"([^"\\\n]|\\\"|{ESCAPES})*\"
+MULTILINE_SINGLE_QUOTE_STR '''([^'\\]|\\'|{ESCAPES})*'''
+MULTILINE_DOUBLE_QUOTE_STR \"\"\"([^"\\]|\\\"|{ESCAPES})*\"\"\"
+RAW_SINGLE_QUOTE_STR r''|r'([^'\n]|\\'|\\\n)*[^\\]'
+RAW_DOUBLE_QUOTE_STR r\"\"|r\"([^"\n]|\\\"|\\\n)*[^\\]\"
+RAW_MULTILINE_SINGLE_QUOTE_STR r''''''|r'''([^']|\\')*[^\\]'''
+RAW_MULTILINE_DOUBLE_QUOTE_STR r\"\"\"\"\"\"|r\"\"\"([^"]|\\\")*[^\\]\"\"\"
+BYTES b{STRING}|rb''|rb'([^'\n]|\\'|\\\n)*[^\\]'|rb\"\"|rb\"([^"\n]|\\\"|\\\n)*[^\\]\"|rb''''''|rb'''([^']|\\')*[^\\]'''|rb\"\"\"\"\"\"|rb\"\"\"([^"]|\\\")*[^\\]\"\"\"
+ESCAPES \\([abfnrtv]|\n|[0-7]{1,3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})
+
+
 COMMENT #[^\n]*\n
 /* supports both Unix and Windows style new line */
 NEW_LINE \n|\r\n 
