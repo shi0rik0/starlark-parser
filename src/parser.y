@@ -454,12 +454,122 @@ SliceExpr
         e.data = std::move(se);
         $$ = std::move(e);
     }
+    | PrimaryExpr LBRACKET COLON RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1;
+        none0.type = none1.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_pair(make_unique<Expr>(std::move(none0)), make_unique<Expr>(std::move(none1)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET Expr_Loose COLON RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1;
+        none0.type = none1.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_pair(make_unique<Expr>(std::move($3)), make_unique<Expr>(std::move(none1)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET COLON Expr RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1;
+        none0.type = none1.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_pair(make_unique<Expr>(std::move(none0)), make_unique<Expr>(std::move($4)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
     | PrimaryExpr LBRACKET Expr_Loose COLON Expr COLON Expr RBRACKET { 
         Expr e;
         e.type = Expr::Type::SLICE;
         SliceExpr se;
         se.sequence = make_unique<Expr>(std::move($1));
         se.slice = make_tuple(make_unique<Expr>(std::move($3)), make_unique<Expr>(std::move($5)), make_unique<Expr>(std::move($7)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET COLON COLON RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1, none2;
+        none0.type = none1.type = none2.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move(none0)), make_unique<Expr>(std::move(none1)), make_unique<Expr>(std::move(none2)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET Expr_Loose COLON COLON RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1, none2;
+        none0.type = none1.type = none2.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move($3)), make_unique<Expr>(std::move(none1)), make_unique<Expr>(std::move(none2)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET COLON Expr COLON RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1, none2;
+        none0.type = none1.type = none2.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move(none0)), make_unique<Expr>(std::move($4)), make_unique<Expr>(std::move(none2)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET Expr_Loose COLON Expr COLON RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1, none2;
+        none0.type = none1.type = none2.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move($3)), make_unique<Expr>(std::move($5)), make_unique<Expr>(std::move(none2)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET COLON COLON Expr RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1, none2;
+        none0.type = none1.type = none2.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move(none0)), make_unique<Expr>(std::move(none1)), make_unique<Expr>(std::move($5)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET Expr_Loose COLON COLON Expr RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1, none2;
+        none0.type = none1.type = none2.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move($3)), make_unique<Expr>(std::move(none1)), make_unique<Expr>(std::move($6)));
+        e.data = std::move(se);
+        $$ = std::move(e);
+    }
+    | PrimaryExpr LBRACKET COLON Expr COLON Expr RBRACKET { 
+        Expr e;
+        e.type = Expr::Type::SLICE;
+        Expr none0, none1, none2;
+        none0.type = none1.type = none2.type = Expr::Type::NONE;
+        SliceExpr se;
+        se.sequence = make_unique<Expr>(std::move($1));
+        se.slice = make_tuple(make_unique<Expr>(std::move(none0)), make_unique<Expr>(std::move($4)), make_unique<Expr>(std::move($6)));
         e.data = std::move(se);
         $$ = std::move(e);
     }
@@ -544,7 +654,7 @@ Operand
         $$.type = Expr::Type::LIST_COMPREHENSION;
         $$.data = std::move(c);
     }
-    | LBRACKET Expr COLON Expr ForClause CompClauses RBRACKET {
+    | LBRACE Expr COLON Expr ForClause CompClauses RBRACE {
         DictComprehension c;
         c.item = make_pair(make_unique<Expr>(std::move($2)), make_unique<Expr>(std::move($4)));
         $6.emplace_front(std::move($5));

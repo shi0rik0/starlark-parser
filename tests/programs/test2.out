@@ -1,0 +1,46 @@
+[Def] f(*args,**kwargs)->{
+    [Return] TUPLE(IDENTIFIER(args),IDENTIFIER(kwargs))
+}
+[Def] while_break(n)->{
+    [Assign] IDENTIFIER(r)=INT(0)
+    [For] IDENTIFIER(i)=CALL(IDENTIFIER(range),INT(1000)){
+        [If] 
+        EQ(IDENTIFIER(n),INT(5))->{
+            [Break] 
+        }
+        [Assign] IDENTIFIER(r)+=IDENTIFIER(n)
+        [Assign] IDENTIFIER(n)-=INT(1)
+    }
+    [Return] IDENTIFIER(r)
+}
+[Def] while_continue(n)->{
+    [Assign] IDENTIFIER(r)=INT(0)
+    [For] IDENTIFIER(i)=CALL(IDENTIFIER(range),INT(1000)){
+        [If] 
+        LE(IDENTIFIER(n),INT(0))->{
+            [Break] 
+        }
+        [If] 
+        EQ(MOD(IDENTIFIER(n),INT(2)),INT(0))->{
+            [Assign] IDENTIFIER(n)-=INT(1)
+            [Continue] 
+        }
+        [Assign] IDENTIFIER(r)+=IDENTIFIER(n)
+        [Assign] IDENTIFIER(n)-=INT(1)
+    }
+    [Return] IDENTIFIER(r)
+}
+[Def] fib(n)->{
+    [Assign] IDENTIFIER(seq)=LIST()
+    [Assign] IDENTIFIER(x)=INT(0)
+    [Assign] IDENTIFIER(y)=INT(1)
+    [For] IDENTIFIER(i)=CALL(IDENTIFIER(range),IDENTIFIER(n)){
+        [If] 
+        EQ(CALL(IDENTIFIER(len),IDENTIFIER(seq)),IDENTIFIER(n))->{
+            [Break] 
+        }
+        [Expr] CALL(DOT(IDENTIFIER(seq),append),IDENTIFIER(x))
+        [Assign] TUPLE(IDENTIFIER(x),IDENTIFIER(y))=TUPLE(IDENTIFIER(y),ADD(IDENTIFIER(x),IDENTIFIER(y)))
+    }
+    [Return] IDENTIFIER(seq)
+}

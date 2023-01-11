@@ -106,7 +106,7 @@ struct Expr {
         FLOAT,
         STRING,
         BYTES,
-
+        NONE,
         // containers
         LIST,
         TUPLE,

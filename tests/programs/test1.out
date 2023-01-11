@@ -1,0 +1,26 @@
+[Assign] IDENTIFIER(number)=INT(18)
+[Assign] IDENTIFIER(people)=DICT(STRING("Alice"):INT(22),STRING("Bob"):INT(40),STRING("Charlie"):INT(55),STRING("Dave"):INT(14))
+[Assign] IDENTIFIER(names)=CALL(DOT(STRING(", "),join),CALL(DOT(IDENTIFIER(people),keys)))
+[Def] greet(name)->{
+    [Expr] STRING("""Return a greeting.""")
+    [Return] CALL(DOT(STRING("Hello {}!"),format),IDENTIFIER(name))
+}
+[Assign] IDENTIFIER(greeting)=CALL(IDENTIFIER(greet),IDENTIFIER(names))
+[Assign] IDENTIFIER(above30)=LIST_COMPREHENSION(IDENTIFIER(name),FOR(TUPLE(IDENTIFIER(name),IDENTIFIER(age)),CALL(DOT(IDENTIFIER(people),items))),IF(GE(IDENTIFIER(age),INT(30))))
+[Expr] CALL(IDENTIFIER(print),CALL(DOT(STRING("{} people are above 30."),format),CALL(IDENTIFIER(len),IDENTIFIER(above30))))
+[Def] fizz_buzz(n)->{
+    [Expr] STRING("""Print Fizz Buzz numbers from 1 to n.""")
+    [For] IDENTIFIER(i)=CALL(IDENTIFIER(range),INT(1),ADD(IDENTIFIER(n),INT(1))){
+        [Assign] IDENTIFIER(s)=STRING("")
+        [If] 
+        EQ(MOD(IDENTIFIER(i),INT(3)),INT(0))->{
+            [Assign] IDENTIFIER(s)+=STRING("Fizz")
+        }
+        [If] 
+        EQ(MOD(IDENTIFIER(i),INT(5)),INT(0))->{
+            [Assign] IDENTIFIER(s)+=STRING("Buzz")
+        }
+        [Expr] CALL(IDENTIFIER(print),IF_EXPR(IDENTIFIER(s),IDENTIFIER(s),IDENTIFIER(i)))
+    }
+}
+[Expr] CALL(IDENTIFIER(fizz_buzz),INT(20))

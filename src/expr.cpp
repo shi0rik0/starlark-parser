@@ -22,6 +22,9 @@ std::ostream& operator<<(std::ostream& os, Expr::Type t)
     case Expr::Type::BYTES:
         os << "BYTES";
         break;
+    case Expr::Type::NONE:
+        os << "NONE";
+        break;
     case Expr::Type::LIST:
         os << "LIST";
         break;
