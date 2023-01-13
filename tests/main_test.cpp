@@ -53,7 +53,7 @@ void test_parser(const string& name)
     parser.parse();
 
     for (const Statement& i : v) {
-        output << i << endl;
+        output << i;
     }
 
     EXPECT_TRUE(output.str() == expected_output) << "[Actual]\n"
@@ -69,6 +69,31 @@ TEST(MainTest, TestLexer1)
 TEST(MainTest, TestParser2)
 {
     test_parser("2");
+}
+
+TEST(MainTest, TestParser3)
+{
+    test_parser("3");
+}
+
+TEST(MainTest, TestParser4)
+{
+    test_parser("4");
+}
+
+TEST(MainTest, TestParser5)
+{
+    test_parser("5");
+}
+
+TEST(MainTest, TestParser6)
+{
+    test_parser("6");
+}
+
+TEST(MainTest, TestParser7)
+{
+    test_parser("7");
 }
 
 TEST(MainTest, TestExpr)
